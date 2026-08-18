@@ -250,3 +250,31 @@ To test the preview:
 - **Domain Error Handling**: Decoupled domain exceptions mapped cleanly to HTTP responses via FastAPI global exception handlers.
 - **Testing**: 100% passing pytest suite with mocked services and error assertions.
 
+---
+
+### Frontend Scalable Architecture Refactoring - 2026-08-19
+
+**What:** Restructured the Next.js frontend according to the [Complete Guide to Scalable Next.js Architecture](https://dev.to/melvinprince/the-complete-guide-to-scalable-nextjs-architecture-39o0) by Melvin Prince.
+
+**Key Changes:**
+- **Modular Component Categorization**:
+  - `components/ui/`: Atomic UI primitives (`Button`, `Textarea`, `Badge`, `Spinner`).
+  - `components/common/`: Reusable widgets (`EmptyState`).
+  - `components/layout/`: Structural layout containers (`Header`, `PreviewHeader`).
+  - `components/pages/`: Feature composite components (`ChatPanel`, `MessageList`, `MessageItem`, `ChatInput`, `PreviewPanel`, `BuilderPage`).
+- **Encapsulated Custom Hooks**:
+  - `hooks/useAppGeneration.ts`: Handles chat messages, prompt generation, loading states, and live preview updates.
+  - `hooks/useAutoScroll.ts`: Auto-scrolls message list on new messages.
+  - `hooks/usePreview.ts`: Controls iframe preview URL and refreshing.
+- **Decoupled API & Client Layer**:
+  - `api/apiClient.ts`: Type-safe HTTP client with custom `ApiError` handling.
+  - `api/generateService.ts`: Dedicated service functions for backend communication (`generateApp`, `checkBackendHealth`).
+- **Central Configuration & Types**:
+  - `lib/config.ts`: Environment-aware API URL resolution (`NEXT_PUBLIC_API_URL` or `http://localhost:8000`).
+  - `types/`: Strict TypeScript models (`Message`, `GeneratedFiles`, `GenerateRequest`, `GenerateResponse`, `HealthResponse`, `ApiErrorResponse`).
+- **Clean App Entrypoint**:
+  - `app/page.tsx`: Lightweight page orchestrator rendering `<BuilderPage />`.
+- **Validation**:
+  - `npm run build` and `npm run lint` passed with 0 errors.
+
+
