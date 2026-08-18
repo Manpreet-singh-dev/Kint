@@ -9,7 +9,7 @@ Work top to bottom within the active phase. Check off as completed. Keep each ta
 - [x] Wire frontend to backend `/generate` endpoint end to end (no LLM call yet — hardcode a fixed response)
 - [x] Integrate managed sandbox service (E2B): a function that takes a dict of `{filename: content}` and returns `{stdout, stderr, preview_url}`
 - [x] Add a live preview pane in the frontend that renders the sandbox's preview URL
-- [ ] Replace the stub `/generate` response with a single-agent Claude call: prompt in, generated files out
+- [x] Replace the stub `/generate` response with a single-agent Claude call: prompt in, generated files out
 - [ ] Connect generation → sandbox → preview: full path from user prompt to a running app, no retry logic yet
 - [ ] Manual test: run 5 varied prompts, note what breaks
 

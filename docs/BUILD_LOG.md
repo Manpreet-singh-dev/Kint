@@ -175,3 +175,59 @@ To test the preview:
 3. For now, layout and controls are ready
 
 **Next:** Replace stub /generate response with Claude API call (Task 6).
+
+## 2026-08-18: Phase 1 — Claude Code Generation
+
+**What:** Replaced stub `/generate` endpoint with actual Claude API integration for code generation.
+
+**Implementation:**
+- `backend/app/coder.py`: New Coder agent module
+  - `generate_files_from_prompt()`: Takes user prompt, returns dict of files
+  - Uses Claude Sonnet 4 with structured system prompt
+  - Parses code blocks from response (```filename.ext format)
+  - Validates that index.html exists as entry point
+  - Custom error handling with CodeGenerationError
+- `backend/app/main.py`: Updated /generate endpoint
+  - Replaced stub with real Coder agent call
+  - Returns generated files to frontend
+  - HTTPException handling for user/system errors
+  - preview_url remains None (Task 7 will connect sandbox)
+- `backend/pyproject.toml`: Added anthropic>=0.40.0 dependency
+- `backend/.env.example`: Updated to require ANTHROPIC_API_KEY
+
+**System Prompt Design:**
+- Instructs Claude to generate complete web applications
+- Requires specific code block format with filenames
+- Emphasizes HTML/CSS/JavaScript with index.html entry point
+- Focuses on working code first, then aesthetics
+- Uses semantic HTML, responsive CSS, vanilla JS
+
+**Response Parsing:**
+- Regex pattern matches ```filename.ext blocks
+- Extracts filename and content
+- Filters out language markers (```html, ```css without filenames)
+- Builds dict of {filename: content}
+
+**Error Handling:**
+- CodeGenerationError for user-facing issues (missing API key, bad format)
+- HTTP 400 for user errors, 500 for system errors
+- Validates index.html presence before returning
+- Descriptive error messages for debugging
+
+**Model Selection:**
+- Using claude-sonnet-4-20250514
+- max_tokens: 4096 (sufficient for small apps, can increase later)
+- Single message exchange (no conversation history in Phase 1)
+
+**Setup Required:**
+1. Get Anthropic API key from https://console.anthropic.com/
+2. Add to `backend/.env` as `ANTHROPIC_API_KEY=your_key_here`
+3. Restart backend server
+4. Test with: `curl -X POST http://localhost:8000/generate -H "Content-Type: application/json" -d '{"prompt": "Build a simple counter app"}'`
+
+**Testing Notes:**
+- Frontend will now receive actual generated files instead of stub
+- Files display in chat as code blocks
+- Preview panel still shows empty state (Task 7 will connect sandbox → preview)
+
+**Next:** Connect generation → sandbox → preview for full end-to-end flow (Task 7).

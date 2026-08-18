@@ -6,10 +6,11 @@ the agent pipeline (Planner → Coder → Sandbox → Debugger).
 """
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from .coder import generate_files_from_prompt, CodeGenerationError
 from .sandbox import execute_files
 
 # Load environment variables from .env file
@@ -57,28 +58,40 @@ def read_root():
 @app.post("/generate", response_model=GenerateResponse)
 def generate(request: GenerateRequest):
     """
-    Generate an app from a text prompt.
+    Generate an app from a text prompt using Claude.
 
-    Currently returns a stub response. In future phases, this will:
-    1. Send prompt to Planner agent for build steps
-    2. Execute Coder agent for each step
-    3. Run generated files in sandbox
-    4. Trigger Debugger agent if execution fails
+    Phase 1: Single-agent implementation - Coder agent generates files directly.
+    Phase 2 will add: Planner → Coder → Sandbox → Debugger pipeline with retry logic.
 
     Args:
         request: Contains the user's text prompt
 
     Returns:
-        GenerateResponse with a message and generated files dict
+        GenerateResponse with message, generated files, and preview_url (None for now)
+
+    Raises:
+        HTTPException: If code generation fails (400 for user errors, 500 for system errors)
     """
-    # Stub response - no LLM call yet
-    return GenerateResponse(
-        message=f"Received prompt: '{request.prompt}'. App generation will be implemented in Phase 2.",
-        files={
-            "index.html": "<!DOCTYPE html><html><body><h1>Hello World</h1></body></html>",
-            "style.css": "body { font-family: sans-serif; margin: 40px; }",
-        }
-    )
+    try:
+        # Call Coder agent to generate files
+        files = generate_files_from_prompt(request.prompt)
+
+        return GenerateResponse(
+            message=f"Generated {len(files)} file(s) based on your prompt. Preview coming in next task!",
+            files=files,
+            preview_url=None,  # Task 7 will connect sandbox execution
+        )
+
+    except CodeGenerationError as e:
+        # User-facing errors (missing API key, bad response format)
+        raise HTTPException(status_code=400, detail=str(e))
+
+    except Exception as e:
+        # Unexpected system errors
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error during code generation: {str(e)}"
+        )
 
 
 @app.get("/sandbox/test", response_model=SandboxResponse)
