@@ -5,13 +5,24 @@ Work top to bottom within the active phase. Check off as completed. Keep each ta
 ## Phase 1 — Core loop (Week 1)
 
 - [x] Scaffold FastAPI backend with a single `/generate` endpoint that accepts a text prompt and returns a stub response
-- [ ] Scaffold Next.js frontend with a chat input and a message list
+- [x] Scaffold Next.js frontend with a chat input and a message list
 - [ ] Wire frontend to backend `/generate` endpoint end to end (no LLM call yet — hardcode a fixed response)
 - [ ] Integrate managed sandbox service (E2B): a function that takes a dict of `{filename: content}` and returns `{stdout, stderr, preview_url}`
 - [ ] Add a live preview pane in the frontend that renders the sandbox's preview URL
 - [ ] Replace the stub `/generate` response with a single-agent Claude call: prompt in, generated files out
 - [ ] Connect generation → sandbox → preview: full path from user prompt to a running app, no retry logic yet
 - [ ] Manual test: run 5 varied prompts, note what breaks
+
+## Phase 1.5 — UI shell (before Week 2)
+ 
+Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status, right panel for live preview, dark-mode-first. Rough wireframe agreed: 340px left panel (chat thread, agent status trail with Planner/Coder/Sandbox/Debugger states, message input) + flexible right panel (browser-chrome-style preview with URL bar, refresh, open-in-new-tab).
+ 
+- [ ] Build the two-panel layout shell (left chat panel, right preview panel) in dark mode, no live data yet
+- [ ] Build the chat thread UI (user/agent message bubbles, input box) inside the left panel
+- [ ] Build the agent status trail component (Planner/Coder/Sandbox/Debugger rows with idle/active/done/error states) — this is the highest-value UI piece, worth extra polish since it visualizes the multi-agent architecture directly
+- [ ] Build the preview panel chrome (URL bar, refresh, open-in-new-tab) with a placeholder empty state
+- [ ] Wire the agent status trail to real state from the Phase 1 generation call (idle → active → done, no error state yet since there's no retry loop until Phase 2)
+- [ ] Responsive/basic empty and loading states for both panels
 
 ## Phase 2 — Multi-agent orchestration (Week 2)
 
