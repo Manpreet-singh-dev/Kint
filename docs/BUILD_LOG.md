@@ -89,3 +89,39 @@ Manual testing should verify:
 - Error case: backend offline → error message displayed
 
 **Next:** Integrate E2B sandbox service (Task 4).
+
+## 2026-08-18: Phase 1 — E2B Sandbox Integration
+
+**What:** Integrated E2B Code Interpreter for executing generated files in isolated sandboxes.
+
+**Implementation:**
+- `backend/app/sandbox.py`: New module for sandbox execution
+  - `execute_files()` function takes dict of {filename: content}
+  - Returns SandboxResult with stdout, stderr, preview_url
+  - Handles different file types (HTML → HTTP server, Python → execute, others → list)
+  - Error handling for missing API keys and execution failures
+- `backend/app/main.py`: Added environment variable loading and test endpoint
+  - `load_dotenv()` loads .env on startup
+  - `/sandbox/test` endpoint for testing E2B integration
+  - Returns execution results and preview URL for a test HTML page
+- `backend/pyproject.toml`: Added e2b-code-interpreter and python-dotenv dependencies
+- `backend/.gitignore`: Created to exclude .env, venv, and cache files
+- `backend/.env`: Template created (user needs to add their E2B_API_KEY)
+
+**Tradeoffs:**
+- Using e2b-code-interpreter (managed service) rather than self-hosted Docker — simpler setup, follows PRD requirement
+- Synchronous sandbox execution — will block during file execution, but acceptable for Phase 1 single-user testing
+- HTTP server on port 8000 for HTML files — simple default, can be customized later
+- Error returned as part of SandboxResult rather than raising exceptions — easier to handle in API responses
+
+**API Design:**
+- SandboxResult dataclass: clean separation of success/error states
+- Async function signature: ready for future async E2B operations
+- Separate test endpoint: can verify sandbox works without full generation flow
+
+**Setup required:**
+1. User needs to get E2B API key from https://e2b.dev/docs/getting-started/api-key
+2. Add to `backend/.env` as `E2B_API_KEY=your_key_here`
+3. Test with `curl http://localhost:8000/sandbox/test`
+
+**Next:** Add live preview pane in frontend (Task 5).
