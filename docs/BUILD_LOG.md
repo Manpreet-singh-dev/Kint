@@ -277,4 +277,40 @@ To test the preview:
 - **Validation**:
   - `npm run build` and `npm run lint` passed with 0 errors.
 
+---
 
+### Connect Generation → Sandbox → Preview (Full Pipeline) - 2026-08-19
+
+**What:** Wired the full Phase 1 core loop end-to-end: User Prompt → Claude (Coder Agent) → E2B Sandbox → Live Preview URL → Frontend iframe.
+
+**Key Changes:**
+
+- **Sandbox Service Rewrite** (`app/services/sandbox.py`):
+  - Switched from `e2b_code_interpreter.Sandbox` (Jupyter-style, `run_code`) to core `e2b.Sandbox` (shell-based, `commands.run` + `get_host`). The code interpreter SDK doesn't support `get_host()` for public preview URLs — the core SDK does.
+  - Uses `sandbox.files.write()` to deploy generated files, `sandbox.commands.run("python3 -m http.server 3000", background=True)` to start a static server, and `sandbox.get_host(3000)` to get the public URL.
+  - Sandbox is intentionally **not killed** after capturing the URL — the preview iframe needs it alive. E2B auto-terminates after its default timeout (~5 min).
+  - Returns `sandbox_id` for future keep-alive/kill endpoints.
+  - Raises `SandboxExecutionError` (caught by global exception handler) instead of silently returning error strings.
+
+- **Generate Route** (`app/api/routes/generate.py`):
+  - Made the handler `async def` to `await` sandbox execution.
+  - Added `SandboxService` as a second DI dependency via `Depends(get_sandbox_service)`.
+  - Pipeline: `coder_service.generate_files(prompt)` → `sandbox_service.execute_files(files)` → return `preview_url`.
+  - Sandbox errors are non-fatal: generated files are still returned with error info in the `message` field.
+
+- **Schema Update** (`app/schemas/sandbox.py`):
+  - Added `sandbox_id: Optional[str]` to `SandboxResult`.
+
+- **Frontend**: No changes required — already handles `preview_url` correctly.
+
+**Tradeoffs:**
+- Sandbox kept alive after URL capture means E2B credits are consumed for the full timeout window, even if the user navigates away. Acceptable for Phase 1; Phase 2 can add explicit cleanup.
+- Port 3000 chosen (configurable via `SandboxService.SERVE_PORT`) — avoids conflict with common port 8000 used by backend dev server.
+- `time.sleep(1)` after starting the HTTP server gives it time to bind to the port before capturing the URL. Not ideal, but simple and reliable for Phase 1.
+
+**Testing:**
+- 11/11 pytest tests passing.
+- New tests: `test_generate_full_pipeline_success` (verifies full pipeline returns `preview_url`), `test_generate_sandbox_error_still_returns_files` (sandbox fails but files still returned).
+- Existing tests updated to verify sandbox is NOT called when code generation fails.
+
+**Next:** Manual test with 5 varied prompts to note what breaks (Task 8).

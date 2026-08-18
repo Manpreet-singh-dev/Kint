@@ -41,9 +41,10 @@ def mock_sandbox_service() -> MagicMock:
     mock = MagicMock(spec=SandboxService)
     mock.execute_files = AsyncMock(
         return_value=SandboxResult(
-            stdout="Serving HTTP on 0.0.0.0 port 8000 ...",
+            stdout="HTTP server started on port 3000",
             stderr="",
-            preview_url="https://8000-test-sandbox.e2b.dev",
+            preview_url="https://3000-test-sandbox.e2b.dev",
+            sandbox_id="test-sandbox-id-123",
             error=None,
         )
     )

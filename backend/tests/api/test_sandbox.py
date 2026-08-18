@@ -16,7 +16,7 @@ def test_sandbox_endpoint_success(client: TestClient, mock_sandbox_service: Magi
         assert response.status_code == 200
         data = response.json()
         assert "preview_url" in data
-        assert data["preview_url"] == "https://8000-test-sandbox.e2b.dev"
+        assert data["preview_url"] == "https://3000-test-sandbox.e2b.dev"
         assert data["error"] is None
         mock_sandbox_service.execute_files.assert_called_once()
     finally:
@@ -31,6 +31,6 @@ def test_versioned_sandbox_endpoint(client: TestClient, mock_sandbox_service: Ma
         response = client.get("/api/v1/sandbox/test")
         assert response.status_code == 200
         data = response.json()
-        assert data["preview_url"] == "https://8000-test-sandbox.e2b.dev"
+        assert data["preview_url"] == "https://3000-test-sandbox.e2b.dev"
     finally:
         app.dependency_overrides.clear()

@@ -8,6 +8,7 @@ class SandboxResult(BaseModel):
     stdout: str = ""
     stderr: str = ""
     preview_url: Optional[str] = None
+    sandbox_id: Optional[str] = None
     error: Optional[str] = None
 
 
