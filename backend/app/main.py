@@ -37,6 +37,7 @@ class GenerateResponse(BaseModel):
     """Response model for /generate endpoint."""
     message: str
     files: dict[str, str]
+    preview_url: str | None = None
 
 
 class SandboxResponse(BaseModel):

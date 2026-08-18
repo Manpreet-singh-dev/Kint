@@ -125,3 +125,53 @@ Manual testing should verify:
 3. Test with `curl http://localhost:8000/sandbox/test`
 
 **Next:** Add live preview pane in frontend (Task 5).
+
+## 2026-08-18: Phase 1 — Live Preview Pane
+
+**What:** Added two-panel layout with live preview of generated apps.
+
+**Implementation:**
+- `frontend/app/page.tsx`: Complete UI restructure
+  - Two-panel layout: left chat panel (420px) + right preview panel (flexible)
+  - Dark-mode-first design with zinc color palette
+  - Preview state management with `previewUrl` state
+  - Preview controls: refresh button, URL bar, open in new tab
+  - Empty state for preview panel when no app is generated
+  - Iframe sandbox for secure preview rendering
+- `backend/app/main.py`: Added `preview_url` to GenerateResponse model
+  - Optional field (None by default for stub responses)
+  - Ready for sandbox integration in next task
+
+**UI/UX Design:**
+- Left panel: 420px fixed width for chat interface
+  - Header with app name and description
+  - Message list with scrolling
+  - Chat input at bottom
+- Right panel: Flexible width for preview
+  - Browser-style chrome (refresh, URL bar, open in new tab)
+  - Iframe with sandbox attributes for security
+  - Empty state with helpful message when no preview
+
+**Visual Updates:**
+- Switched from light theme to dark theme (bg-zinc-950/900)
+- User messages: light background (zinc-100), assistant: dark (zinc-800)
+- Consistent spacing and rounded corners (rounded-xl, rounded-2xl)
+- Icon-based controls for preview actions
+
+**Security:**
+- Iframe sandbox attributes: allow-scripts, allow-same-origin, allow-forms
+- Prevents malicious code from accessing parent window
+
+**Preview URL handling:**
+- Frontend checks for `preview_url` in API response
+- Updates preview state when URL is present
+- Refresh button adds timestamp to force reload
+- Open in new tab for full-screen testing
+
+**Testing:**
+To test the preview:
+1. Backend needs to return `preview_url` in response
+2. Next task will connect /generate → sandbox → preview_url
+3. For now, layout and controls are ready
+
+**Next:** Replace stub /generate response with Claude API call (Task 6).
