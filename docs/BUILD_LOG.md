@@ -231,3 +231,22 @@ To test the preview:
 - Preview panel still shows empty state (Task 7 will connect sandbox → preview)
 
 **Next:** Connect generation → sandbox → preview for full end-to-end flow (Task 7).
+
+---
+
+### Backend Architecture Refactoring (Auth0 FastAPI Best Practices) - 2026-08-18
+
+**What:** Restructured the FastAPI backend to adhere to standard enterprise architectural patterns following the [Auth0 FastAPI Best Practices](https://auth0.com/blog/fastapi-best-practices/) guide.
+
+**Key Changes:**
+- **Layered Folder Structure**:
+  - `app/api/`: Modular route handlers (`routes/generate.py`, `routes/sandbox.py`, `routes/health.py`), dependency injection (`deps.py`), and aggregate router (`main.py`).
+  - `app/core/`: Centralized Pydantic settings (`config.py`), domain exceptions & global exception handlers (`exceptions.py`).
+  - `app/schemas/`: Typed Pydantic request/response schemas with OpenAPI `Field` examples and validation.
+  - `app/services/`: Isolated business logic and agent implementations (`CoderService`, `SandboxService`).
+  - `app/main.py`: Clean FastAPI application factory, CORS middleware, global exception handlers, and versioned + root router mounting.
+  - `tests/`: Separated test suite with pytest fixtures, dependency overrides, and unit/integration tests (`test_health.py`, `test_generate.py`, `test_sandbox.py`).
+- **Dependency Injection**: Route handlers inject services via `Depends(get_coder_service)`, `Depends(get_sandbox_service)`.
+- **Domain Error Handling**: Decoupled domain exceptions mapped cleanly to HTTP responses via FastAPI global exception handlers.
+- **Testing**: 100% passing pytest suite with mocked services and error assertions.
+
