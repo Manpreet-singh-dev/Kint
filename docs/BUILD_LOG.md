@@ -57,3 +57,35 @@ Running log of implementation decisions and rationale.
 - UI renders with proper styling in both empty and message states
 
 **Next:** Wire frontend to backend `/generate` endpoint (Task 3).
+
+## 2026-08-18: Phase 1 — Frontend-Backend Integration
+
+**What:** Connected Next.js frontend to FastAPI backend `/generate` endpoint.
+
+**Implementation:**
+- `frontend/app/page.tsx`: Replaced setTimeout stub with actual fetch call
+  - POST request to `http://localhost:8000/generate` with prompt
+  - Parses JSON response containing `message` and `files` dict
+  - Formats files as code blocks in the assistant message
+  - Error handling with user-friendly messages
+  - Fixed keyboard event handling for Enter key (uses `form.requestSubmit()`)
+
+**Tradeoffs:**
+- Hardcoded backend URL (localhost:8000) — sufficient for local development, will need env variable for production
+- Displays files inline as markdown code blocks — simple for Phase 1, will be replaced by preview pane in later tasks
+- No retry logic on failed requests — user sees error message and can try again manually
+- CORS already configured in backend (Task 1), so no additional frontend changes needed
+
+**Error handling:**
+- Network errors caught and displayed to user
+- Message includes hint to check if backend is running
+- Non-200 responses treated as errors
+
+**Testing:**
+Manual testing should verify:
+- User submits prompt → loading indicator appears
+- Backend processes request → assistant message with stub files appears
+- Files formatted with filename and code block
+- Error case: backend offline → error message displayed
+
+**Next:** Integrate E2B sandbox service (Task 4).

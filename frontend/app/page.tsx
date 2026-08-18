@@ -24,20 +24,51 @@ export default function Home() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const prompt = input.trim();
     setInput("");
     setIsLoading(true);
 
-    // Backend integration will be added in the next task
-    // For now, just add a placeholder assistant message
-    setTimeout(() => {
+    try {
+      const response = await fetch("http://localhost:8000/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Format response: message + files listing
+      let content = data.message;
+
+      if (data.files && Object.keys(data.files).length > 0) {
+        content += "\n\n**Generated files:**\n";
+        for (const [filename, fileContent] of Object.entries(data.files)) {
+          content += `\n📄 ${filename}\n\`\`\`\n${fileContent}\n\`\`\`\n`;
+        }
+      }
+
       const assistantMessage: Message = {
         role: "assistant",
-        content: "Backend integration coming in next task...",
+        content,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        role: "assistant",
+        content: `Error: ${error instanceof Error ? error.message : "Failed to connect to backend"}. Make sure the FastAPI server is running on http://localhost:8000`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -147,7 +178,7 @@ export default function Home() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSubmit(e);
+                e.currentTarget.form?.requestSubmit();
               }
             }}
             placeholder="Describe the app you want to build..."
