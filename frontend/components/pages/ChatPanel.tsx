@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Message } from "@/types";
+import { Message, AgentTrailState } from "@/types";
 import { Header } from "@/components/layout";
+import { AgentStatusTrail } from "@/components/common";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 
@@ -10,9 +11,15 @@ export interface ChatPanelProps {
   messages: Message[];
   isLoading: boolean;
   onSend: (prompt: string) => void;
+  agentTrail?: AgentTrailState;
 }
 
-export function ChatPanel({ messages, isLoading, onSend }: ChatPanelProps) {
+export function ChatPanel({
+  messages,
+  isLoading,
+  onSend,
+  agentTrail,
+}: ChatPanelProps) {
   const [inputVal, setInputVal] = useState("");
 
   const handleSelectSuggestion = (prompt: string) => {
@@ -22,6 +29,9 @@ export function ChatPanel({ messages, isLoading, onSend }: ChatPanelProps) {
   return (
     <div className="flex w-full h-full flex-col bg-zinc-900 overflow-hidden">
       <Header />
+      <div className="px-3 pt-3">
+        <AgentStatusTrail trail={agentTrail} />
+      </div>
       <MessageList
         messages={messages}
         isLoading={isLoading}

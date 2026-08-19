@@ -442,3 +442,57 @@ GEMINI_API_KEY=your_key_here
 - `npm run build` compiled all static routes successfully.
 
 **Next:** Build the chat thread UI (user/agent message bubbles, input box) inside the left panel.
+
+---
+
+### Phase 1.5 — Chat Thread UI (User/Agent Bubbles & Input Box) - 2026-08-19
+
+**What:** Built the rich dark-mode chat thread UI optimized for the 340px sidebar, featuring user/assistant message bubbles with code blocks, one-click code copy, auto-scrolling message list, starter suggestion cards, and an auto-resizing input box.
+
+**Key Implementation Details:**
+- **Message Bubbles** (`components/pages/MessageItem.tsx`):
+  - User messages styled with indigo accent (`bg-indigo-600/20 text-indigo-50 border border-indigo-500/30 rounded-2xl rounded-tr-xs`) and timestamp.
+  - Assistant messages styled with dark container (`bg-zinc-950/90 text-zinc-200 border border-zinc-800/90 rounded-2xl rounded-tl-xs`), gradient sparkle avatar, code block detection, filename header, and one-click copy button.
+- **Message List & Starter Chips** (`components/pages/MessageList.tsx`):
+  - Smooth auto-scrolling with `useAutoScroll`.
+  - Empty state with 4 starter suggestion cards (Stopwatch & Timer, Kanban Board, Expense Tracker, Retro Snake Game). Clicking any chip populates the input field.
+  - Animated assistant loading indicator with pulsing dots.
+- **Chat Input Box** (`components/pages/ChatInput.tsx`):
+  - Auto-resizing textarea pinned to the bottom of the sidebar.
+  - Submit button with gradient glow when input is non-empty, inline spinner during generation.
+  - Keyboard shortcuts (`Enter` to submit, `Shift+Enter` for multi-line).
+
+**Validation:**
+- `npm run lint` passed with 0 errors and 0 warnings.
+- `npm run build` compiled all routes cleanly.
+
+**Next:** Build the agent status trail component (Planner/Coder/Sandbox/Debugger rows with idle/active/done/error states).
+
+---
+
+### Phase 1.5 — Multi-Agent Status Trail Component - 2026-08-20
+
+**What:** Built the multi-agent status trail component (`AgentStatusTrail`) visualizing the 4 core agents (Planner → Coder → Sandbox → Debugger) directly within the 340px left sidebar.
+
+**Key Implementation Details:**
+- **Typed Agent State Contract** (`types/agent.ts`):
+  - `AgentType`: `"planner" | "coder" | "sandbox" | "debugger"`
+  - `AgentState`: `"idle" | "active" | "done" | "error"`
+  - `AgentStepStatus`: contains label, description, state, durationSec, error, and details list.
+  - `AgentTrailState`: map of all 4 agent steps.
+- **AgentStatusTrail Component** (`components/common/AgentStatusTrail.tsx`):
+  - Collapsible container header with summary badge (Idle, Running, Ready, Attention) and progress counter (`X/4 Completed`).
+  - Vertical connecting pipeline line linking the 4 steps with subtle gradient styling.
+  - Distinct state icons and micro-animations:
+    - `idle`: Muted bullet dot with dark border.
+    - `active`: Glowing pulse ring with animated spinner and highlighted indigo background.
+    - `done`: Crisp emerald checkmark with elapsed seconds badge (e.g. `3.2s`).
+    - `error`: Rose warning icon with error message text.
+- **Embedded in Sidebar** (`components/pages/ChatPanel.tsx`):
+  - Placed above the message list with compact padding suited for the 340px width.
+
+**Validation:**
+- `npm run lint` passed with 0 errors and 0 warnings.
+- `npm run build` compiled all routes cleanly.
+
+**Next:** Build the preview panel chrome (URL bar, refresh, open-in-new-tab) with a placeholder empty state.
