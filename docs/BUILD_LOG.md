@@ -359,3 +359,86 @@ GEMINI_API_KEY=your_key_here
 **Testing:**
 - 11/11 pytest tests passing.
 - Tests mock at the `CoderService` level (above the provider abstraction) so they're provider-agnostic.
+
+---
+
+### Phase 1 Manual Testing — 5 Varied Prompts & Breakage Analysis - 2026-08-19
+
+**What:** Executed end-to-end manual testing with 5 diverse prompts across the complete pipeline (Prompt → LLM Code Generation → E2B Cloud Sandbox Execution → Public Preview URL → HTTP Validation). Evaluated output quality, runtime reliability, file parsing, and failure modes to inform Phase 1.5 and Phase 2.
+
+**Prompts Tested:**
+
+1. **Stopwatch & Countdown Timer** (`prompt_1_counter_stopwatch` - Single-Page Utility & State):
+   - *Prompt:* "Build a clean, modern stopwatch and countdown timer app with lap times, sound alerts (using Web Audio API), start/pause/reset buttons, and a dark mode toggle."
+   - *Result:* Generated `index.html` (175 lines, 9.3 KB) and `style.css` (542 lines, 10.9 KB).
+   - *Timing:* Generation: 35.95s | Sandbox: 5.16s | Total: 41.82s. Preview returned HTTP 200.
+   - *Behavior:* Rendered clean UI with dark theme, stopwatch/timer tabs, lap table. Web Audio synthesized beeps directly.
+
+2. **Kanban Todo Board** (`prompt_2_kanban_todo` - CRUD / State / LocalStorage):
+   - *Prompt:* "Build a Kanban board with 3 columns (To Do, In Progress, Done), task cards with priority badges (Low, Med, High), drag-and-drop support, ability to add/edit/delete tasks, and persist state in localStorage."
+   - *Result:* Generated `index.html` (138 lines, 5.9 KB) and `style.css` (532 lines, 10.5 KB).
+   - *Timing:* Generation: 37.67s | Sandbox: 2.95s | Total: 41.14s. Preview returned HTTP 200.
+   - *Behavior:* HTML5 Drag and Drop events (`dragstart`, `dragover`, `drop`) implemented. LocalStorage persistence for cards.
+
+3. **Expense Tracker & Visual Chart** (`prompt_3_expense_tracker_chart` - Data / Canvas Visualization):
+   - *Prompt:* "Build a personal expense tracker app with a summary card (total income, expenses, net balance), add transaction form with categories, transaction history list with filtering and delete, and an interactive HTML5 Canvas pie/bar chart showing category breakdowns."
+   - *Result:* Generated `index.html` (179 lines, 8.6 KB) and `style.css` (585 lines, 10.1 KB).
+   - *Timing:* Generation: 37.81s | Sandbox: 3.13s | Total: 41.38s. Preview returned HTTP 200.
+   - *Behavior:* Built-in HTML5 Canvas 2D rendering for doughnut/pie breakdown without heavy third-party bundle requirements.
+
+4. **Retro Snake Arcade Game** (`prompt_4_snake_game` - Game Loop & Real-Time Controls):
+   - *Prompt:* "Build a retro Snake arcade game using HTML5 Canvas with smooth controls (arrow keys and on-screen directional buttons for mobile), score tracking, high score saved in localStorage, speed levels, pause/resume, and game over screen with restart."
+   - *Result:* Generated `index.html` (115 lines, 5.0 KB) and `style.css` (375 lines, 7.7 KB).
+   - *Timing:* Generation: 36.56s | Sandbox: 2.33s | Total: 39.41s. Preview returned HTTP 200.
+   - *Behavior:* Game tick loop with `requestAnimationFrame` / `setInterval`, directional keylisteners, and touch d-pad for mobile.
+
+5. **Markdown Live Editor & Exporter** (`prompt_5_markdown_editor` - Multi-Component / Rich Text):
+   - *Prompt:* "Build a split-screen Markdown live editor and previewer with syntax highlighting, word and character counters, table generation toolbar buttons, and the ability to export the document as a .md file or download as HTML."
+   - *Result:* Generated `index.html` (139 lines, 7.4 KB) and `style.css` (483 lines, 9.4 KB).
+   - *Timing:* Generation: 37.80s | Sandbox: 2.23s | Total: 40.66s. Preview returned HTTP 200 initially.
+   - *Behavior:* Used CDN links for `marked.min.js`, `highlight.min.js`, `purify.min.js`.
+
+---
+
+### Key Findings & What Breaks (Critical Takeaways for Phase 1.5 and Phase 2)
+
+1. **Missing / Referenced File 404s (Single-Agent Limitation)**:
+   - *Problem:* In Prompt 5 (Markdown Editor), `index.html` referenced `<script src="script.js"></script>`, but the model generated only `index.html` and `style.css`, completely omitting the `script.js` code block. This resulted in a silent 404 for `script.js` and non-functional interactivity.
+   - *Architectural Need:* Phase 2 **Planner** (to enforce explicit file manifest before coding) and **Debugger** (to catch 404s/unresolved references and loop back to the Coder).
+
+2. **E2B Sandbox Lifespan & 502 Bad Gateway Expiry**:
+   - *Problem:* Sandboxes auto-terminate after ~2-5 minutes of inactivity or session disconnect. When inspecting earlier preview URLs after 3 minutes, they returned `502 Bad Gateway`.
+   - *Architectural Need:* Need explicit sandbox keep-alive / heartbeat management or on-demand re-spawn for inactive preview sessions.
+
+3. **Inline vs External File Generation Strategy**:
+   - *Problem:* In prompts 1-4, the model embedded JavaScript into inline `<script>` tags inside `index.html`, whereas `style.css` was split. This was more robust than referencing an external `script.js` that might fail to generate, but makes modular editing harder.
+   - *Architectural Need:* System prompt should either enforce single-file bundles (`index.html` with inline styles/scripts for simple apps) or strict multi-file manifests where every referenced `<script src="...">` or `<link href="...">` must be present in the output dictionary.
+
+4. **Pipeline Latency**:
+   - *Metrics:* LLM generation takes ~36-38s per app; E2B sandbox boot takes ~2-5s. Total roundtrip is ~40s.
+   - *Architectural Need:* Phase 1.5 UI shell requires clear, animated progress indicators (Planner → Coder → Sandbox → Debugger) to provide real-time feedback during the 40s wait.
+
+**Next:** Phase 1.5 — UI shell (Dark mode two-panel layout, chat thread, agent status trail, and browser-chrome preview).
+
+---
+
+### Phase 1.5 — Two-Panel Layout Shell (Dark Mode First) - 2026-08-19
+
+**What:** Built the foundational two-panel layout shell according to the agreed wireframe (340px fixed left panel for chat and multi-agent orchestration trail, flexible right panel for live preview with browser chrome).
+
+**Key Implementation Details:**
+- **TwoPanelShell Layout Container** (`components/layout/TwoPanelShell.tsx`):
+  - Strict 340px width (`w-[340px] shrink-0`) left sidebar with `bg-zinc-900/95`, subtle `border-r border-zinc-800/80`, and depth shadowing.
+  - Flexible right preview panel (`flex-1 min-w-0 bg-zinc-950`) providing responsive scaling for the live iframe container.
+- **Brand Header** (`components/layout/Header.tsx`):
+  - Compact header optimized for the 340px sidebar width with vibrant gradient icon, version pill (`v0.1`), and clear typography.
+- **Browser Chrome Preview Bar** (`components/layout/PreviewHeader.tsx`):
+  - Classic browser window indicators (rose/amber/emerald dots), refresh button, SSL secured URL bar pill, open-in-new-tab action, and responsive viewport mode toggles (Desktop, Tablet, Mobile).
+- **Page Orchestrator** (`components/pages/BuilderPage.tsx`):
+  - Composes `ChatPanel` and `PreviewPanel` directly into `TwoPanelShell`.
+
+**Validation:**
+- `npm run lint` passed with 0 errors.
+- `npm run build` compiled all static routes successfully.
+
+**Next:** Build the chat thread UI (user/agent message bubbles, input box) inside the left panel.

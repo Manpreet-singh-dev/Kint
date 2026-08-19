@@ -1,0 +1,207 @@
+[
+  {
+    "test_num": 1,
+    "id": "prompt_1_counter_stopwatch",
+    "category": "Single-Page Utility / State",
+    "prompt": "Build a clean, modern stopwatch and countdown timer app with lap times, sound alerts (using Web Audio API), start/pause/reset buttons, and a dark mode toggle.",
+    "generation_time_sec": 35.95,
+    "sandbox_time_sec": 5.16,
+    "total_time_sec": 41.82,
+    "files_generated": [
+      "index.html",
+      "style.css"
+    ],
+    "file_sizes": {
+      "index.html": 9278,
+      "style.css": 10903
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": false,
+    "sandbox_success": true,
+    "preview_url": "https://3000-ic629gi9ov5kmeoairngy.e2b.app",
+    "sandbox_id": "ic629gi9ov5kmeoairngy",
+    "stdout": "HTTP server started on port 3000",
+    "stderr": "",
+    "http_status": 200,
+    "preview_accessible": true,
+    "errors": [],
+    "observations": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 175,
+        "chars": 9278,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\" data-theme=\"dark\">"
+      },
+      "style.css": {
+        "lines": 542,
+        "chars": 10903,
+        "first_50_chars": ":root {     --bg-main: #0b0f19;     --bg-card: #15"
+      }
+    }
+  },
+  {
+    "test_num": 2,
+    "id": "prompt_2_kanban_todo",
+    "category": "CRUD / Interactive State / LocalStorage",
+    "prompt": "Build a Kanban board with 3 columns (To Do, In Progress, Done), task cards with priority badges (Low, Med, High), drag-and-drop support, ability to add/edit/delete tasks, and persist state in localStorage.",
+    "generation_time_sec": 37.67,
+    "sandbox_time_sec": 2.95,
+    "total_time_sec": 41.14,
+    "files_generated": [
+      "index.html",
+      "style.css"
+    ],
+    "file_sizes": {
+      "index.html": 5868,
+      "style.css": 10508
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": false,
+    "sandbox_success": true,
+    "preview_url": "https://3000-ickegfnqkerucsr0p66ze.e2b.app",
+    "sandbox_id": "ickegfnqkerucsr0p66ze",
+    "stdout": "HTTP server started on port 3000",
+    "stderr": "",
+    "http_status": 200,
+    "preview_accessible": true,
+    "errors": [],
+    "observations": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 138,
+        "chars": 5868,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 532,
+        "chars": 10508,
+        "first_50_chars": ":root {     --bg-main: #f8fafc;     --bg-column: #"
+      }
+    }
+  },
+  {
+    "test_num": 3,
+    "id": "prompt_3_expense_tracker_chart",
+    "category": "Data / Visualization / Canvas",
+    "prompt": "Build a personal expense tracker app with a summary card (total income, expenses, net balance), add transaction form with categories, transaction history list with filtering and delete, and an interactive HTML5 Canvas pie/bar chart showing category breakdowns.",
+    "generation_time_sec": 37.81,
+    "sandbox_time_sec": 3.13,
+    "total_time_sec": 41.38,
+    "files_generated": [
+      "index.html",
+      "style.css"
+    ],
+    "file_sizes": {
+      "index.html": 8604,
+      "style.css": 10142
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": false,
+    "sandbox_success": true,
+    "preview_url": "https://3000-irre0e6pkf3680beso74m.e2b.app",
+    "sandbox_id": "irre0e6pkf3680beso74m",
+    "stdout": "HTTP server started on port 3000",
+    "stderr": "",
+    "http_status": 200,
+    "preview_accessible": true,
+    "errors": [],
+    "observations": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 179,
+        "chars": 8604,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 585,
+        "chars": 10142,
+        "first_50_chars": ":root {     --bg-main: #f4f6f9;     --bg-card: #ff"
+      }
+    }
+  },
+  {
+    "test_num": 4,
+    "id": "prompt_4_snake_game",
+    "category": "Canvas Game / Real-time Loop / Input Handling",
+    "prompt": "Build a retro Snake arcade game using HTML5 Canvas with smooth controls (arrow keys and on-screen directional buttons for mobile), score tracking, high score saved in localStorage, speed levels, pause/resume, and game over screen with restart.",
+    "generation_time_sec": 36.56,
+    "sandbox_time_sec": 2.33,
+    "total_time_sec": 39.41,
+    "files_generated": [
+      "index.html",
+      "style.css"
+    ],
+    "file_sizes": {
+      "index.html": 4972,
+      "style.css": 7686
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": false,
+    "sandbox_success": true,
+    "preview_url": "https://3000-ialrxqlagtwjy5dkgswts.e2b.app",
+    "sandbox_id": "ialrxqlagtwjy5dkgswts",
+    "stdout": "HTTP server started on port 3000",
+    "stderr": "",
+    "http_status": 200,
+    "preview_accessible": true,
+    "errors": [],
+    "observations": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 115,
+        "chars": 4972,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 375,
+        "chars": 7686,
+        "first_50_chars": ":root {     --bg-dark: #0a0a12;     --arcade-body:"
+      }
+    }
+  },
+  {
+    "test_num": 5,
+    "id": "prompt_5_markdown_editor",
+    "category": "Multi-component / Rich Text / File Export",
+    "prompt": "Build a split-screen Markdown live editor and previewer with syntax highlighting, word and character counters, table generation toolbar buttons, and the ability to export the document as a .md file or download as HTML.",
+    "generation_time_sec": 37.8,
+    "sandbox_time_sec": 2.23,
+    "total_time_sec": 40.66,
+    "files_generated": [
+      "index.html",
+      "style.css"
+    ],
+    "file_sizes": {
+      "index.html": 7372,
+      "style.css": 9415
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": false,
+    "sandbox_success": true,
+    "preview_url": "https://3000-idsei8dmw6vhvsvpavx9n.e2b.app",
+    "sandbox_id": "idsei8dmw6vhvsvpavx9n",
+    "stdout": "HTTP server started on port 3000",
+    "stderr": "",
+    "http_status": 200,
+    "preview_accessible": true,
+    "errors": [],
+    "observations": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 139,
+        "chars": 7372,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\" data-theme=\"dark\">"
+      },
+      "style.css": {
+        "lines": 483,
+        "chars": 9415,
+        "first_50_chars": "/* --- Root CSS Variables & Themes --- */ :root[da"
+      }
+    }
+  }
+]

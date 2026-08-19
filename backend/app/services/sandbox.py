@@ -49,8 +49,8 @@ class SandboxService:
             )
 
         try:
-            # Create sandbox instance with the E2B API key
-            sandbox = Sandbox(api_key=api_key)
+            # Create sandbox instance with the E2B API key (v2 SDK uses .create())
+            sandbox = Sandbox.create(api_key=api_key)
 
             # Write all generated files to the sandbox filesystem
             for filename, content in files.items():

@@ -20,7 +20,7 @@ export function ChatPanel({ messages, isLoading, onSend }: ChatPanelProps) {
   };
 
   return (
-    <div className="flex w-[420px] shrink-0 flex-col border-r border-zinc-800 bg-zinc-900 h-full">
+    <div className="flex w-full h-full flex-col bg-zinc-900 overflow-hidden">
       <Header />
       <MessageList
         messages={messages}

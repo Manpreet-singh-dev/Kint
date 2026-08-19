@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     CLAUDE_MAX_TOKENS: int = 4096
 
     # Gemini model settings
-    GEMINI_MODEL: str = "gemini-2.5-pro"
+    GEMINI_MODEL: str = "gemini-3.6-flash"
     GEMINI_MAX_TOKENS: int = 8192
 
     @field_validator("LLM_PROVIDER", mode="before")
@@ -59,7 +59,7 @@ class Settings(BaseSettings):
         return v
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=("backend/.env", ".env"),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
