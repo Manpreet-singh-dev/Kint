@@ -496,3 +496,27 @@ GEMINI_API_KEY=your_key_here
 - `npm run build` compiled all routes cleanly.
 
 **Next:** Build the preview panel chrome (URL bar, refresh, open-in-new-tab) with a placeholder empty state.
+
+---
+
+### Phase 1.5 — Preview Panel Chrome & Placeholder Empty State - 2026-08-20
+
+**What:** Upgraded the right preview panel with full browser-chrome controls (SSL URL bar with click-to-copy, animated refresh, external window opener, and responsive Desktop/Tablet/Mobile device frame viewport switching) alongside a dark-mode placeholder empty state.
+
+**Key Implementation Details:**
+- **Preview Chrome Navigation** (`components/layout/PreviewHeader.tsx`):
+  - Mac-style traffic lights (rose/amber/emerald window controls).
+  - Animated reload button with refresh transition.
+  - Interactive URL address bar with SSL lock, live running pulse badge, and click-to-copy clipboard feedback (`✓ URL Copied!`).
+  - Viewport mode switcher (`Desktop`, `Tablet`, `Mobile`) with dedicated device icons.
+  - External tab launcher (`Open`) with target `_blank`.
+- **Placeholder Empty State** (`components/pages/PreviewPanel.tsx`):
+  - Glassmorphic browser mockup card with ambient glow and icon badge.
+  - Informative overview and 3 feature highlight cards (E2B Sandbox Cloud VM, Multi-Device previewing, Hot live reload).
+  - Responsive iframe frame bezels scaling to 768px (Tablet) and 390px (Mobile) with rounded corners and drop shadows.
+
+**Validation:**
+- `npm run lint` passed with 0 errors and 0 warnings.
+- `npm run build` compiled all routes cleanly.
+
+**Next:** Wire the agent status trail to real state from the Phase 1 generation call (idle → active → done, no error state yet since there's no retry loop until Phase 2).

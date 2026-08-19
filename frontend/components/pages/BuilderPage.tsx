@@ -28,6 +28,7 @@ export function BuilderPage() {
         <PreviewPanel
           previewUrl={previewUrl}
           onRefresh={refreshPreview}
+          isLoading={isLoading}
         />
       }
     />
