@@ -314,3 +314,48 @@ To test the preview:
 - Existing tests updated to verify sandbox is NOT called when code generation fails.
 
 **Next:** Manual test with 5 varied prompts to note what breaks (Task 8).
+
+---
+
+### Multi-LLM Provider Support (Claude + Gemini) - 2026-08-19
+
+**What:** Added the ability to switch between Claude and Gemini as the code generation LLM via the `LLM_PROVIDER` environment variable. Uses the Strategy pattern with a shared `LLMProvider` protocol.
+
+**Key Changes:**
+
+- **Provider Abstraction** (`app/services/providers/`):
+  - `base.py`: `LLMProvider` Protocol defining the `generate_text(system_prompt, user_prompt) -> str` contract.
+  - `claude.py`: `ClaudeProvider` wrapping the Anthropic SDK (extracted from the old `CoderService`).
+  - `gemini.py`: `GeminiProvider` wrapping the `google-genai` SDK (`generate_content` with `system_instruction` config).
+  - `__init__.py`: Factory function `get_llm_provider(settings)` with lazy imports (only loads the SDK you're using).
+
+- **Config** (`app/core/config.py`):
+  - Added `LLM_PROVIDER` (default: `"claude"`) with a Pydantic validator that rejects unsupported values at startup.
+  - Added `GEMINI_API_KEY`, `GEMINI_MODEL` (default: `"gemini-2.5-pro"`), `GEMINI_MAX_TOKENS` (default: `8192`).
+
+- **CoderService** (`app/services/coder.py`):
+  - Refactored to accept an `LLMProvider` instead of using Anthropic directly.
+  - System prompt extracted as a module-level constant (shared across providers).
+  - `generate_files()` calls `provider.generate_text()` — fully provider-agnostic.
+
+- **Dependency Injection** (`app/api/deps.py`):
+  - New DI chain: `Settings → get_llm_provider() → CoderService`.
+  - The provider is resolved from `settings.LLM_PROVIDER` and injected.
+
+- **Dependencies** (`pyproject.toml`): Added `google-genai>=1.0.0`.
+
+**How to switch providers:**
+```bash
+# In .env:
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your_key_here
+```
+
+**Tradeoffs:**
+- Lazy provider imports avoid loading both SDKs at startup — only the selected SDK is imported.
+- Gemini `max_output_tokens` set to 8192 (vs Claude's 4096) since Gemini models handle longer outputs well.
+- Both providers share the same system prompt and file parsing logic — output format consistency depends on the model following the `\`\`\`filename.ext` convention (both Claude and Gemini handle this well).
+
+**Testing:**
+- 11/11 pytest tests passing.
+- Tests mock at the `CoderService` level (above the provider abstraction) so they're provider-agnostic.

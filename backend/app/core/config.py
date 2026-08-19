@@ -1,7 +1,14 @@
+from enum import Enum
 from functools import lru_cache
 from typing import List, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class LLMProviderEnum(str, Enum):
+    """Supported LLM providers."""
+    CLAUDE = "claude"
+    GEMINI = "gemini"
 
 
 class Settings(BaseSettings):
@@ -18,13 +25,31 @@ class Settings(BaseSettings):
     # CORS origins
     CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000"]
 
+    # LLM provider selection
+    LLM_PROVIDER: str = "claude"
+
     # Third-party API keys
     ANTHROPIC_API_KEY: str | None = None
+    GEMINI_API_KEY: str | None = None
     E2B_API_KEY: str | None = None
 
     # Claude model settings
     CLAUDE_MODEL: str = "claude-sonnet-4-20250514"
     CLAUDE_MAX_TOKENS: int = 4096
+
+    # Gemini model settings
+    GEMINI_MODEL: str = "gemini-2.5-pro"
+    GEMINI_MAX_TOKENS: int = 8192
+
+    @field_validator("LLM_PROVIDER", mode="before")
+    @classmethod
+    def validate_llm_provider(cls, v: str) -> str:
+        valid = [e.value for e in LLMProviderEnum]
+        if v.lower() not in valid:
+            raise ValueError(
+                f"Invalid LLM_PROVIDER: '{v}'. Must be one of: {valid}"
+            )
+        return v.lower()
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

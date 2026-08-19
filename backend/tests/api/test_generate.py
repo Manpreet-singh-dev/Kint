@@ -73,10 +73,19 @@ def test_generate_sandbox_error_still_returns_files(
         app.dependency_overrides.clear()
 
 
-def test_generate_endpoint_validation_error(client: TestClient):
+def test_generate_endpoint_validation_error(
+    client: TestClient,
+    mock_coder_service: MagicMock,
+    mock_sandbox_service: MagicMock,
+):
     """Test POST /generate with empty prompt returns 422 Unprocessable Entity."""
-    response = client.post("/generate", json={"prompt": ""})
-    assert response.status_code == 422
+    _override_deps(mock_coder_service, mock_sandbox_service)
+
+    try:
+        response = client.post("/generate", json={"prompt": ""})
+        assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_generate_code_generation_error_handled(

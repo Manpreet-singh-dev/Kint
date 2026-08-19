@@ -8,6 +8,7 @@ from fastapi import Depends
 from app.core.config import Settings, get_settings
 from app.services.coder import CoderService
 from app.services.sandbox import SandboxService
+from app.services.providers import LLMProvider, get_llm_provider
 
 
 def get_app_settings() -> Settings:
@@ -15,9 +16,14 @@ def get_app_settings() -> Settings:
     return get_settings()
 
 
-def get_coder_service(settings: Settings = Depends(get_app_settings)) -> CoderService:
-    """Provide CoderService instance with injected settings."""
-    return CoderService(settings=settings)
+def get_provider(settings: Settings = Depends(get_app_settings)) -> LLMProvider:
+    """Provide the configured LLM provider (Claude or Gemini)."""
+    return get_llm_provider(settings)
+
+
+def get_coder_service(provider: LLMProvider = Depends(get_provider)) -> CoderService:
+    """Provide CoderService instance with injected LLM provider."""
+    return CoderService(provider=provider)
 
 
 def get_sandbox_service(settings: Settings = Depends(get_app_settings)) -> SandboxService:
