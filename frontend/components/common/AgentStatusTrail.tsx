@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { AgentState, AgentTrailState, AgentType } from "@/types";
 
 export interface AgentStatusTrailProps {
@@ -50,7 +50,10 @@ export function AgentStatusTrail({
   onToggleExpanded,
   className = "",
 }: AgentStatusTrailProps) {
-  const [internalExpanded, setInternalExpanded] = useState(true);
+  // Default closed as requested
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const isExpanded =
     controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
 
@@ -61,6 +64,29 @@ export function AgentStatusTrail({
       setInternalExpanded((prev) => !prev);
     }
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        if (onToggleExpanded) {
+          onToggleExpanded();
+        } else {
+          setInternalExpanded(false);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isExpanded, onToggleExpanded]);
 
   const steps = Object.values(trail);
   const completedCount = steps.filter((s) => s.state === "done").length;
@@ -174,6 +200,7 @@ export function AgentStatusTrail({
 
   return (
     <div
+      ref={containerRef}
       className={`rounded-xl border border-zinc-800/90 bg-zinc-950/80 shadow-md backdrop-blur-sm overflow-hidden select-none transition-all ${className}`}
     >
       {/* Header Bar */}

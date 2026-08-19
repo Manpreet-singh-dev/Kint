@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { PreviewHeader, ViewportMode } from "@/components/layout";
+import { Spinner } from "@/components/ui";
 
 export interface PreviewPanelProps {
   previewUrl: string | null;
@@ -29,7 +30,7 @@ export function PreviewPanel({
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-950 h-full overflow-hidden">
+    <div className="flex flex-1 flex-col bg-zinc-950 h-full overflow-hidden relative">
       <PreviewHeader
         previewUrl={previewUrl}
         onRefresh={onRefresh}
@@ -38,7 +39,25 @@ export function PreviewPanel({
         onViewportChange={setViewportMode}
       />
 
-      <div className="flex flex-1 items-center justify-center p-4 md:p-6 overflow-hidden bg-radial from-zinc-900/30 via-zinc-950 to-zinc-950">
+      <div className="flex flex-1 items-center justify-center p-4 md:p-6 overflow-hidden bg-radial from-zinc-900/30 via-zinc-950 to-zinc-950 relative">
+        {/* Loading Overlay when generating with active preview */}
+        {isLoading && previewUrl && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-zinc-950/70 backdrop-blur-xs transition-all">
+            <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 shadow-2xl backdrop-blur-md">
+              <Spinner className="h-4 w-4 text-indigo-400" />
+              <div className="text-left">
+                <p className="text-xs font-semibold text-zinc-100">
+                  Rebuilding Application...
+                </p>
+                <p className="text-[11px] text-zinc-400">
+                  Updating sandbox environment
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Case 1: Active Preview iframe */}
         {previewUrl ? (
           <div
             className={`transition-all duration-300 ease-out flex items-center justify-center w-full h-full ${
@@ -52,7 +71,34 @@ export function PreviewPanel({
               sandbox="allow-scripts allow-same-origin allow-forms"
             />
           </div>
+        ) : isLoading ? (
+          /* Case 2: Loading State (No preview yet) */
+          <div className="flex flex-col items-center justify-center max-w-sm text-center px-4 select-none">
+            <div className="relative mb-6">
+              {/* Pulsing ambient aura */}
+              <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-pink-500/30 blur-2xl animate-pulse" />
+              
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-900/90 shadow-2xl backdrop-blur-md">
+                <Spinner className="h-8 w-8 text-indigo-400" />
+              </div>
+            </div>
+
+            <h2 className="text-base font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
+              <span>Booting Sandbox</span>
+              <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-ping" />
+            </h2>
+            <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
+              Synthesizing code files with LLM and spinning up an isolated E2B
+              cloud container on port 3000...
+            </p>
+
+            <div className="mt-5 flex items-center gap-2 rounded-full bg-zinc-900 border border-zinc-800 px-3.5 py-1.5 text-[11px] text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span>Step: Code Generation & Execution</span>
+            </div>
+          </div>
         ) : (
+          /* Case 3: Initial Empty State */
           <div className="flex flex-col items-center justify-center max-w-lg text-center px-4 select-none">
             {/* Visual Chrome Illustration */}
             <div className="relative mb-6">

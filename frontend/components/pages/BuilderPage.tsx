@@ -11,17 +11,20 @@ export function BuilderPage() {
     messages,
     isLoading,
     previewUrl,
+    agentTrail,
     handleGenerate,
     refreshPreview,
   } = useAppGeneration();
 
   return (
     <TwoPanelShell
+      hasPreview={!!previewUrl}
       leftPanel={
         <ChatPanel
           messages={messages}
           isLoading={isLoading}
           onSend={handleGenerate}
+          agentTrail={agentTrail}
         />
       }
       rightPanel={

@@ -520,3 +520,46 @@ GEMINI_API_KEY=your_key_here
 - `npm run build` compiled all routes cleanly.
 
 **Next:** Wire the agent status trail to real state from the Phase 1 generation call (idle → active → done, no error state yet since there's no retry loop until Phase 2).
+
+---
+
+### Phase 1.5 — Wire Agent Status Trail to Live Generation Pipeline - 2026-08-20
+
+**What:** Connected the multi-agent status trail (`AgentStatusTrail`) in the UI to the real runtime lifecycle of the `/generate` endpoint in `useAppGeneration`.
+
+**Key Implementation Details:**
+- **Dynamic State Progression** (`hooks/useAppGeneration.ts`):
+  - **Initiation**: When prompt is submitted, `Planner` transitions to `active` ("Analyzing prompt & architecture plan...") while subsequent agents are `idle`.
+  - **Code Generation**: Transitions to `Coder` `active` ("Generating HTML, CSS, and JS files..."), computing and recording duration.
+  - **Sandbox Deployment**: When backend returns files, `Coder` transitions to `done` (`Generated N file(s)`), and `Sandbox` transitions to `done` ("Live HTTP server running on port 3000") with duration.
+  - **Verification**: `Debugger` marks `done` ("App verified, preview live") once the preview URL is successfully mounted.
+  - **Error Handling**: On failure, the failing step transitions to `error` with the descriptive error message, keeping subsequent steps `idle`.
+- **Prop Pipeline Integration** (`components/pages/BuilderPage.tsx` → `components/pages/ChatPanel.tsx`):
+  - Passes dynamic `agentTrail` state directly to `ChatPanel` and `AgentStatusTrail`.
+
+**Validation:**
+- `npm run lint` passed with 0 errors and 0 warnings.
+- `npm run build` compiled all routes cleanly.
+
+**Next:** Responsive/basic empty and loading states for both panels.
+
+---
+
+### Phase 1.5 — Responsive Layout Shell & Empty/Loading States - 2026-08-20
+
+**What:** Completed the final Phase 1.5 task, delivering full mobile/desktop responsive panel adaptation and comprehensive empty & loading states across both the chat sidebar and preview canvas.
+
+**Key Implementation Details:**
+- **Responsive Mobile Layout Switcher** (`components/layout/TwoPanelShell.tsx`):
+  - Desktop: 340px fixed width sidebar + flexible right preview pane.
+  - Mobile (< md breakpoint): Segmented navigation switcher (`💬 Chat` vs `🌐 Preview`) with active pulse badge on preview when an app is mounted.
+- **Preview Panel Empty & Loading States** (`components/pages/PreviewPanel.tsx`):
+  - **Empty State**: Glassmorphic preview illustration with ambient glowing aura, informative headline, and 3 feature highlight cards.
+  - **Initial Booting State**: Animated spinning loader with glowing backdrop, live status pill (`"Step: Code Generation & Execution"`), and step hints.
+  - **Rebuild Overlay**: Translucent backdrop blur overlay over existing iframe during subsequent generation calls to preserve visual continuity.
+
+**Validation:**
+- `npm run lint` passed with 0 errors and 0 warnings.
+- `npm run build` compiled all routes cleanly.
+
+**Next:** Phase 2 — Multi-agent orchestration (Design the agent state machine: planning, coding, executing, debugging, done, failed).

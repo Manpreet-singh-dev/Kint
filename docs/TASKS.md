@@ -21,8 +21,8 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 - [x] Build the chat thread UI (user/agent message bubbles, input box) inside the left panel
 - [x] Build the agent status trail component (Planner/Coder/Sandbox/Debugger rows with idle/active/done/error states) — this is the highest-value UI piece, worth extra polish since it visualizes the multi-agent architecture directly
 - [x] Build the preview panel chrome (URL bar, refresh, open-in-new-tab) with a placeholder empty state
-- [ ] Wire the agent status trail to real state from the Phase 1 generation call (idle → active → done, no error state yet since there's no retry loop until Phase 2)
-- [ ] Responsive/basic empty and loading states for both panels
+- [x] Wire the agent status trail to real state from the Phase 1 generation call (idle → active → done, no error state yet since there's no retry loop until Phase 2)
+- [x] Responsive/basic empty and loading states for both panels
 
 ## Phase 2 — Multi-agent orchestration (Week 2)
 
