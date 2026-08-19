@@ -104,6 +104,7 @@ export function MessageItem({ message }: MessageItemProps) {
         </div>
 
         <span
+          suppressHydrationWarning
           className={`mt-1 px-1 text-[10px] select-none ${
             isUser ? "text-indigo-300/60" : "text-zinc-500"
           }`}

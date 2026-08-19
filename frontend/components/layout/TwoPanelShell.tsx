@@ -17,6 +17,7 @@ const DEFAULT_PANEL_WIDTH = 340;
  * Two-panel layout shell for the Kint AI App Builder.
  * Features an interactive draggable resize splitter to adjust left sidebar width,
  * with mobile tab navigation for responsive screens.
+ * Uses CSS variables for width to ensure perfect SSR hydration without mismatch.
  */
 export function TwoPanelShell({
   leftPanel,
@@ -25,18 +26,27 @@ export function TwoPanelShell({
   hasPreview = false,
 }: TwoPanelShellProps) {
   const [mobileTab, setMobileTab] = useState<"chat" | "preview">("chat");
-  const [leftWidth, setLeftWidth] = useState(DEFAULT_PANEL_WIDTH);
   const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const currentWidthRef = useRef(DEFAULT_PANEL_WIDTH);
 
-  // Restore saved width from localStorage on client load
+  // Restore saved width from localStorage directly into CSS variable after mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem("kint_sidebar_width");
-      if (saved) {
+      if (saved && containerRef.current) {
         const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= MIN_PANEL_WIDTH && parsed <= MAX_PANEL_WIDTH) {
-          setLeftWidth(parsed);
+        if (
+          !isNaN(parsed) &&
+          parsed >= MIN_PANEL_WIDTH &&
+          parsed <= MAX_PANEL_WIDTH
+        ) {
+          currentWidthRef.current = parsed;
+          containerRef.current.style.setProperty(
+            "--sidebar-width",
+            `${parsed}px`
+          );
         }
       }
     } catch {
@@ -53,7 +63,13 @@ export function TwoPanelShell({
   }, []);
 
   const handleDoubleClick = useCallback(() => {
-    setLeftWidth(DEFAULT_PANEL_WIDTH);
+    currentWidthRef.current = DEFAULT_PANEL_WIDTH;
+    if (containerRef.current) {
+      containerRef.current.style.setProperty(
+        "--sidebar-width",
+        `${DEFAULT_PANEL_WIDTH}px`
+      );
+    }
     try {
       localStorage.setItem("kint_sidebar_width", String(DEFAULT_PANEL_WIDTH));
     } catch {
@@ -68,7 +84,13 @@ export function TwoPanelShell({
         Math.max(e.clientX, MIN_PANEL_WIDTH),
         MAX_PANEL_WIDTH
       );
-      setLeftWidth(newWidth);
+      currentWidthRef.current = newWidth;
+      if (containerRef.current) {
+        containerRef.current.style.setProperty(
+          "--sidebar-width",
+          `${newWidth}px`
+        );
+      }
     };
 
     const handleMouseUp = () => {
@@ -78,7 +100,10 @@ export function TwoPanelShell({
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
         try {
-          localStorage.setItem("kint_sidebar_width", String(leftWidth));
+          localStorage.setItem(
+            "kint_sidebar_width",
+            String(currentWidthRef.current)
+          );
         } catch {
           // Ignore
         }
@@ -92,10 +117,16 @@ export function TwoPanelShell({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [leftWidth]);
+  }, []);
 
   return (
     <div
+      ref={containerRef}
+      style={
+        {
+          "--sidebar-width": `${DEFAULT_PANEL_WIDTH}px`,
+        } as React.CSSProperties
+      }
       className={`flex flex-col md:flex-row h-screen w-full bg-zinc-950 text-zinc-100 overflow-hidden select-none relative ${className}`}
     >
       {/* Overlay to capture mouse events when dragging over iframe */}
@@ -109,7 +140,9 @@ export function TwoPanelShell({
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-[10px] font-bold text-white">
             K
           </div>
-          <span className="text-xs font-semibold text-zinc-200">Kint Builder</span>
+          <span className="text-xs font-semibold text-zinc-200">
+            Kint Builder
+          </span>
         </div>
 
         <div className="flex items-center rounded-lg bg-zinc-950 border border-zinc-800 p-0.5">
@@ -141,17 +174,11 @@ export function TwoPanelShell({
         </div>
       </div>
 
-      {/* Left Panel: Resizable on Desktop, Full-width on Mobile when active */}
+      {/* Left Panel: Resizable on Desktop via CSS variable, Full-width on Mobile */}
       <aside
-        style={{ width: undefined }}
-        className={`w-full md:shrink-0 border-r border-zinc-800/80 bg-zinc-900/95 flex flex-col h-full overflow-hidden shadow-2xl z-10 ${
+        className={`w-full md:w-[var(--sidebar-width)] shrink-0 border-r border-zinc-800/80 bg-zinc-900/95 flex flex-col h-full overflow-hidden shadow-2xl z-10 ${
           mobileTab === "chat" ? "flex" : "hidden md:flex"
         }`}
-        ref={(el) => {
-          if (el && window.innerWidth >= 768) {
-            el.style.width = `${leftWidth}px`;
-          }
-        }}
       >
         {leftPanel}
       </aside>

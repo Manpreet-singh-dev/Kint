@@ -550,8 +550,8 @@ GEMINI_API_KEY=your_key_here
 **What:** Completed the final Phase 1.5 task, delivering full mobile/desktop responsive panel adaptation and comprehensive empty & loading states across both the chat sidebar and preview canvas.
 
 **Key Implementation Details:**
-- **Responsive Mobile Layout Switcher** (`components/layout/TwoPanelShell.tsx`):
-  - Desktop: 340px fixed width sidebar + flexible right preview pane.
+- **Responsive Mobile Layout Switcher & Resizable Splitter** (`components/layout/TwoPanelShell.tsx`):
+  - Desktop: Draggable resize handle between sidebar and preview pane with smooth bounds (280px–600px, double-click to reset to 340px) and persistent `localStorage` saving.
   - Mobile (< md breakpoint): Segmented navigation switcher (`💬 Chat` vs `🌐 Preview`) with active pulse badge on preview when an app is mounted.
 - **Preview Panel Empty & Loading States** (`components/pages/PreviewPanel.tsx`):
   - **Empty State**: Glassmorphic preview illustration with ambient glowing aura, informative headline, and 3 feature highlight cards.
