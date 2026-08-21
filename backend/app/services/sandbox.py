@@ -43,9 +43,12 @@ class SandboxService:
         """
         api_key = self.settings.E2B_API_KEY
         if not api_key:
-            raise ConfigurationError(
-                "E2B_API_KEY environment variable not set. "
-                "Get your key from https://e2b.dev/docs/getting-started/api-key"
+            return SandboxResult(
+                stdout="Generated files ready.",
+                stderr="",
+                preview_url=None,
+                sandbox_id=None,
+                error="E2B_API_KEY not configured. Generated code is ready!",
             )
 
         try:
@@ -91,11 +94,6 @@ class SandboxService:
                 stdout = result.stdout or ""
                 stderr = result.stderr or ""
 
-            # NOTE: We intentionally do NOT call sandbox.kill() here.
-            # The sandbox must stay alive so the frontend iframe can access
-            # the preview URL. E2B will auto-terminate the sandbox after its
-            # default timeout (typically 5 minutes).
-
             return SandboxResult(
                 stdout=stdout,
                 stderr=stderr,
@@ -103,10 +101,14 @@ class SandboxService:
                 sandbox_id=sandbox.sandbox_id,
             )
 
-        except ConfigurationError:
-            raise
         except Exception as e:
-            raise SandboxExecutionError(f"Sandbox execution failed: {str(e)}")
+            return SandboxResult(
+                stdout="",
+                stderr=str(e),
+                preview_url=None,
+                sandbox_id=None,
+                error=f"Sandbox execution failed: {str(e)}",
+            )
 
 
 # Convenience module-level function

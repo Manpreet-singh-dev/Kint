@@ -34,10 +34,14 @@ def get_llm_provider(settings: Settings) -> LLMProvider:
         from app.services.providers.gemini import GeminiProvider
         return GeminiProvider(settings=settings)
 
+    elif provider_name in ("grok", "xai", "groq"):
+        from app.services.providers.grok import GrokProvider
+        return GrokProvider(settings=settings)
+
     else:
         raise ConfigurationError(
             f"Unsupported LLM provider: '{settings.LLM_PROVIDER}'. "
-            f"Supported providers: 'claude', 'gemini'.",
+            f"Supported providers: 'claude', 'gemini', 'grok', 'groq'.",
             status_code=400,
         )
 

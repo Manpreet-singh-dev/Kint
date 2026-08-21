@@ -32,22 +32,22 @@ export function MessageItem({ message }: MessageItemProps) {
         return (
           <div
             key={idx}
-            className="my-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/90 text-xs"
+            className="my-2 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950/90 text-xs select-text"
           >
-            <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/80 px-2.5 py-1 text-[11px] text-zinc-400">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/80 px-2.5 py-1 text-[11px] text-zinc-400 select-none">
               <span className="font-mono text-zinc-300 truncate max-w-[180px]">
                 {languageOrFile}
               </span>
               <button
                 type="button"
                 onClick={() => copyToClipboard(codeContent, idx)}
-                className="text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+                className="text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer select-none"
               >
                 {copiedIndex === idx ? "Copied!" : "Copy"}
               </button>
             </div>
-            <pre className="max-h-48 overflow-x-auto p-2.5 font-mono text-[11px] text-zinc-300 leading-relaxed">
-              <code>{codeContent}</code>
+            <pre className="max-h-48 overflow-x-auto p-2.5 font-mono text-[11px] text-zinc-300 leading-relaxed select-text selection:bg-indigo-500/30 selection:text-white">
+              <code className="select-text">{codeContent}</code>
             </pre>
           </div>
         );
@@ -55,7 +55,7 @@ export function MessageItem({ message }: MessageItemProps) {
 
       // Regular text formatting
       return (
-        <span key={idx} className="whitespace-pre-wrap leading-relaxed">
+        <span key={idx} className="whitespace-pre-wrap leading-relaxed select-text selection:bg-indigo-500/30 selection:text-white">
           {part}
         </span>
       );
@@ -64,13 +64,13 @@ export function MessageItem({ message }: MessageItemProps) {
 
   return (
     <div
-      className={`flex gap-2.5 w-full ${
+      className={`flex gap-2.5 w-full select-text ${
         isUser ? "justify-end" : "justify-start"
       }`}
     >
       {/* Assistant Avatar */}
       {!isUser && (
-        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm shadow-indigo-500/20 text-white mt-0.5">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm shadow-indigo-500/20 text-white mt-0.5 select-none">
           <svg
             className="h-3.5 w-3.5"
             fill="none"
@@ -89,15 +89,15 @@ export function MessageItem({ message }: MessageItemProps) {
 
       {/* Message Bubble Container */}
       <div
-        className={`flex flex-col ${
+        className={`flex flex-col select-text ${
           isUser ? "items-end max-w-[88%]" : "items-start max-w-[90%]"
         }`}
       >
         <div
-          className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-sm transition-all ${
+          className={`rounded-2xl px-3.5 py-2.5 text-xs shadow-sm transition-all select-text cursor-text ${
             isUser
-              ? "rounded-tr-xs bg-indigo-600/20 text-indigo-50 border border-indigo-500/30"
-              : "rounded-tl-xs bg-zinc-950/90 text-zinc-200 border border-zinc-800/90"
+              ? "rounded-tr-xs bg-indigo-600/20 text-indigo-50 border border-indigo-500/30 selection:bg-indigo-400/40 selection:text-white"
+              : "rounded-tl-xs bg-zinc-950/90 text-zinc-200 border border-zinc-800/90 selection:bg-indigo-500/30 selection:text-white"
           }`}
         >
           {renderFormattedContent(message.content)}

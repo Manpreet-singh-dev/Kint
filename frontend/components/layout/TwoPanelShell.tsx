@@ -127,7 +127,7 @@ export function TwoPanelShell({
           "--sidebar-width": `${DEFAULT_PANEL_WIDTH}px`,
         } as React.CSSProperties
       }
-      className={`flex flex-col md:flex-row h-screen w-full bg-zinc-950 text-zinc-100 overflow-hidden select-none relative ${className}`}
+      className={`flex flex-col md:flex-row h-screen w-full bg-zinc-950 text-zinc-100 overflow-hidden relative ${className}`}
     >
       {/* Overlay to capture mouse events when dragging over iframe */}
       {isDragging && (

@@ -9,6 +9,9 @@ class LLMProviderEnum(str, Enum):
     """Supported LLM providers."""
     CLAUDE = "claude"
     GEMINI = "gemini"
+    GROK = "grok"
+    XAI = "xai"
+    GROQ = "groq"
 
 
 class Settings(BaseSettings):
@@ -31,6 +34,9 @@ class Settings(BaseSettings):
     # Third-party API keys
     ANTHROPIC_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
+    GROK_API_KEY: str | None = None
+    XAI_API_KEY: str | None = None
+    GROQ_API_KEY: str | None = None
     E2B_API_KEY: str | None = None
 
     # Claude model settings
@@ -40,6 +46,16 @@ class Settings(BaseSettings):
     # Gemini model settings
     GEMINI_MODEL: str = "gemini-3.6-flash"
     GEMINI_MAX_TOKENS: int = 8192
+
+    # Grok (xAI) model settings
+    GROK_MODEL: str = "grok-2-1212"
+    GROK_MAX_TOKENS: int = 4096
+    GROK_BASE_URL: str = "https://api.x.ai/v1"
+
+    # Groq (Groq Cloud) model settings
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    GROQ_MAX_TOKENS: int = 4096
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
 
     @field_validator("LLM_PROVIDER", mode="before")
     @classmethod
