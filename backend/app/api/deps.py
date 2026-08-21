@@ -8,6 +8,7 @@ from fastapi import Depends
 from app.core.config import Settings, get_settings
 from app.services.coder import CoderService
 from app.services.debugger import DebuggerService
+from app.services.orchestrator import OrchestratorService
 from app.services.planner import PlannerService
 from app.services.sandbox import SandboxService
 from app.services.providers import LLMProvider, get_llm_provider
@@ -41,3 +42,19 @@ def get_debugger_service(provider: LLMProvider = Depends(get_provider)) -> Debug
 def get_sandbox_service(settings: Settings = Depends(get_app_settings)) -> SandboxService:
     """Provide SandboxService instance with injected settings."""
     return SandboxService(settings=settings)
+
+
+def get_orchestrator_service(
+    planner: PlannerService = Depends(get_planner_service),
+    coder: CoderService = Depends(get_coder_service),
+    sandbox: SandboxService = Depends(get_sandbox_service),
+    debugger: DebuggerService = Depends(get_debugger_service),
+) -> OrchestratorService:
+    """Provide OrchestratorService instance managing the multi-agent pipeline."""
+    return OrchestratorService(
+        planner=planner,
+        coder=coder,
+        sandbox=sandbox,
+        debugger=debugger,
+        max_retries=2,
+    )

@@ -124,7 +124,10 @@ class CoderService:
                 user_prompt=user_prompt,
             )
 
-            new_or_modified_files = self._parse_files_from_response(response_text)
+            new_or_modified_files = self._parse_files_from_response(
+                response=response_text,
+                expected_target_files=step.target_files,
+            )
 
             if not new_or_modified_files and not current_files:
                 raise CodeGenerationError(
@@ -251,30 +254,49 @@ class CoderService:
             blocks.append(f"```{filename}\n{content}\n```")
         return "\n\n".join(blocks)
 
-    def _parse_files_from_response(self, response: str) -> Dict[str, str]:
+    def _parse_files_from_response(
+        self,
+        response: str,
+        expected_target_files: Optional[list[str]] = None,
+    ) -> Dict[str, str]:
         """
         Parse code blocks from the LLM response into a files dictionary.
 
-        Looks for patterns like:
-        ```filename.ext
-        content
-        ```
+        Recognizes explicit filenames (```index.html) as well as language
+        tags (```html, ```css, ```javascript) with smart mapping.
         """
         if not response:
             return {}
 
         files = {}
-        pattern = r"```(\S+)\n(.*?)```"
-        matches = re.finditer(pattern, response, re.DOTALL)
+        pattern = r"```(\S+)?\n([\s\S]*?)```"
+        matches = list(re.finditer(pattern, response))
 
         for match in matches:
-            filename = match.group(1).strip()
+            tag = (match.group(1) or "").strip().lower()
             content = match.group(2).strip()
 
-            # Skip language markers that aren't filenames (like ```html, ```css, ```json)
-            if "." not in filename:
+            if not content:
                 continue
 
-            files[filename] = content
+            # Case 1: Tag is an explicit filename (e.g. index.html, style.css)
+            if "." in tag:
+                files[tag] = content
+                continue
+
+            # Case 2: Language tag mapping
+            if tag in ("html", "htm") or "<!doctype html" in content.lower() or "<html" in content.lower():
+                files["index.html"] = content
+            elif tag in ("css", "style", "styles"):
+                files["style.css"] = content
+            elif tag in ("javascript", "js", "ts", "typescript"):
+                files["script.js"] = content
+            elif tag == "json":
+                files["data.json"] = content
+            elif expected_target_files and len(expected_target_files) == 1:
+                # If only 1 target file was expected in this step, assign it
+                files[expected_target_files[0]] = content
+            elif "<!doctype" in content.lower():
+                files["index.html"] = content
 
         return files

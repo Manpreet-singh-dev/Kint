@@ -88,30 +88,51 @@ class GrokProvider:
         }
 
         provider_label = "Groq" if self.is_groq else "Grok"
+        max_attempts = 4
 
-        try:
-            with httpx.Client(timeout=60.0) as client:
-                response = client.post(url, json=payload, headers=headers)
+        for attempt in range(max_attempts):
+            try:
+                with httpx.Client(timeout=60.0) as client:
+                    response = client.post(url, json=payload, headers=headers)
 
-            if response.status_code != 200:
-                error_detail = response.text
-                try:
-                    error_json = response.json()
-                    error_detail = error_json.get("error", {}).get("message", response.text)
-                except Exception:
-                    pass
-                raise CodeGenerationError(
-                    f"{provider_label} API call failed (HTTP {response.status_code}): {error_detail}"
-                )
+                if response.status_code == 429 and attempt < max_attempts - 1:
+                    # Rate limit hit: parse retry-after or wait 10 seconds
+                    wait_seconds = 10.0
+                    try:
+                        error_json = response.json()
+                        error_msg = error_json.get("error", {}).get("message", "")
+                        match = re.search(r"try again in ([\d\.]+)s", error_msg)
+                        if match:
+                            wait_seconds = float(match.group(1)) + 1.0
+                    except Exception:
+                        pass
+                    import time
+                    time.sleep(wait_seconds)
+                    continue
 
-            data = response.json()
-            choices = data.get("choices", [])
-            if not choices or "message" not in choices[0]:
-                raise CodeGenerationError(f"{provider_label} API returned an empty or invalid response.")
+                if response.status_code != 200:
+                    error_detail = response.text
+                    try:
+                        error_json = response.json()
+                        error_detail = error_json.get("error", {}).get("message", response.text)
+                    except Exception:
+                        pass
+                    raise CodeGenerationError(
+                        f"{provider_label} API call failed (HTTP {response.status_code}): {error_detail}"
+                    )
 
-            return choices[0]["message"].get("content", "")
+                data = response.json()
+                choices = data.get("choices", [])
+                if not choices or "message" not in choices[0]:
+                    raise CodeGenerationError(f"{provider_label} API returned an empty or invalid response.")
 
-        except Exception as e:
-            if isinstance(e, (CodeGenerationError, ConfigurationError)):
-                raise
-            raise CodeGenerationError(f"{provider_label} API call failed: {str(e)}")
+                return choices[0]["message"].get("content", "")
+
+            except Exception as e:
+                if isinstance(e, (CodeGenerationError, ConfigurationError)):
+                    raise
+                if attempt < max_attempts - 1 and "429" in str(e):
+                    import time
+                    time.sleep(10.0)
+                    continue
+                raise CodeGenerationError(f"{provider_label} API call failed: {str(e)}")

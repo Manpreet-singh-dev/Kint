@@ -1,0 +1,151 @@
+[
+  {
+    "test_num": 1,
+    "id": "prompt_1_counter_stopwatch",
+    "category": "Single-Page Utility / State",
+    "prompt": "Build a clean, modern stopwatch and countdown timer app with lap times, sound alerts (using Web Audio API), start/pause/reset buttons, and a dark mode toggle.",
+    "final_state": null,
+    "total_time_sec": 16.37,
+    "plan_title": null,
+    "plan_step_count": 0,
+    "plan_target_files": [],
+    "files_generated": [],
+    "file_sizes": {},
+    "has_index_html": false,
+    "has_css": false,
+    "has_js": false,
+    "retries_used": 0,
+    "debug_diagnoses_count": 0,
+    "debug_summaries": [],
+    "sandbox_success": false,
+    "preview_url": null,
+    "sandbox_id": null,
+    "message": "",
+    "errors": [
+      "No code files generated for step 1 ('HTML Structure & Layout')."
+    ],
+    "file_contents_summary": {}
+  },
+  {
+    "test_num": 2,
+    "id": "prompt_2_kanban_todo",
+    "category": "CRUD / Interactive State / LocalStorage",
+    "prompt": "Build a Kanban board with 3 columns (To Do, In Progress, Done), task cards with priority badges (Low, Med, High), drag-and-drop support, ability to add/edit/delete tasks, and persist state in localStorage.",
+    "final_state": null,
+    "total_time_sec": 26.95,
+    "plan_title": null,
+    "plan_step_count": 0,
+    "plan_target_files": [],
+    "files_generated": [],
+    "file_sizes": {},
+    "has_index_html": false,
+    "has_css": false,
+    "has_js": false,
+    "retries_used": 0,
+    "debug_diagnoses_count": 0,
+    "debug_summaries": [],
+    "sandbox_success": false,
+    "preview_url": null,
+    "sandbox_id": null,
+    "message": "",
+    "errors": [
+      "No code files generated for step 1 ('HTML Structure & Layout')."
+    ],
+    "file_contents_summary": {}
+  },
+  {
+    "test_num": 3,
+    "id": "prompt_3_expense_tracker_chart",
+    "category": "Data / Visualization / Canvas",
+    "prompt": "Build a personal expense tracker app with a summary card (total income, expenses, net balance), add transaction form with categories, transaction history list with filtering and delete, and an interactive HTML5 Canvas pie/bar chart showing category breakdowns.",
+    "final_state": null,
+    "total_time_sec": 6.77,
+    "plan_title": null,
+    "plan_step_count": 0,
+    "plan_target_files": [],
+    "files_generated": [],
+    "file_sizes": {},
+    "has_index_html": false,
+    "has_css": false,
+    "has_js": false,
+    "retries_used": 0,
+    "debug_diagnoses_count": 0,
+    "debug_summaries": [],
+    "sandbox_success": false,
+    "preview_url": null,
+    "sandbox_id": null,
+    "message": "",
+    "errors": [
+      "No code files generated for step 1 ('HTML Structure & Layout')."
+    ],
+    "file_contents_summary": {}
+  },
+  {
+    "test_num": 4,
+    "id": "prompt_4_snake_game",
+    "category": "Canvas Game / Real-time Loop / Input Handling",
+    "prompt": "Build a retro Snake arcade game using HTML5 Canvas with smooth controls (arrow keys and on-screen directional buttons for mobile), score tracking, high score saved in localStorage, speed levels, pause/resume, and game over screen with restart.",
+    "final_state": null,
+    "total_time_sec": 28.68,
+    "plan_title": null,
+    "plan_step_count": 0,
+    "plan_target_files": [],
+    "files_generated": [],
+    "file_sizes": {},
+    "has_index_html": false,
+    "has_css": false,
+    "has_js": false,
+    "retries_used": 0,
+    "debug_diagnoses_count": 0,
+    "debug_summaries": [],
+    "sandbox_success": false,
+    "preview_url": null,
+    "sandbox_id": null,
+    "message": "",
+    "errors": [
+      "No code files generated for step 1 ('HTML Structure & Layout')."
+    ],
+    "file_contents_summary": {}
+  },
+  {
+    "test_num": 5,
+    "id": "prompt_5_markdown_editor",
+    "category": "Multi-component / Rich Text / File Export",
+    "prompt": "Build a split-screen Markdown live editor and previewer with syntax highlighting, word and character counters, table generation toolbar buttons, and the ability to export the document as a .md file or download as HTML.",
+    "final_state": "done",
+    "total_time_sec": 67.17,
+    "plan_title": "Split\u2011Screen Markdown Editor & Previewer",
+    "plan_step_count": 4,
+    "plan_target_files": [
+      "index.html",
+      "style.css",
+      "script.js"
+    ],
+    "files_generated": [
+      "index.html"
+    ],
+    "file_sizes": {
+      "index.html": 2072
+    },
+    "has_index_html": true,
+    "has_css": false,
+    "has_js": false,
+    "retries_used": 0,
+    "debug_diagnoses_count": 0,
+    "debug_summaries": [],
+    "sandbox_success": true,
+    "preview_url": "https://3000-ihnnkag0756qi7gzbhedn.e2b.app",
+    "sandbox_id": "ihnnkag0756qi7gzbhedn",
+    "message": "Generated 1 file(s) and deployed to sandbox. Preview is live!",
+    "errors": [
+      "'charmap' codec can't encode character '\\u2011' in position 13: character maps to <undefined>"
+    ],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 65,
+        "chars": 2072,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      }
+    }
+  }
+]

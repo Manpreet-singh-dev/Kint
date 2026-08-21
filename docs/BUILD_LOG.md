@@ -650,3 +650,28 @@ GEMINI_API_KEY=your_key_here
 - 38/38 backend pytest tests passed in 1.98s.
 
 **Next:** Wire the retry loop: sandbox failure → Debugger → Coder → sandbox again, capped at 2-3 attempts.
+
+---
+
+### Phase 2 — Multi-Agent Orchestration & Feedback Retry Loop - 2026-08-21
+
+**What:** Wired the complete multi-agent orchestration lifecycle (`OrchestratorService`) implementing the finite state machine connecting Planner → Coder → Sandbox → Debugger with capped retries and clear failure reporting.
+
+**Key Implementation Details:**
+- **Orchestrator Service** (`app/services/orchestrator.py`):
+  - Manages `AgentExecutionContext` with transitions: `PLANNING` → `CODING` → `EXECUTING` → `DEBUGGING` → `DONE` / `FAILED`.
+  - **Planning Phase**: Formulates structured steps via `PlannerService`.
+  - **Coding Phase**: Iteratively builds files via `CoderService.execute_step`.
+  - **Execution & Evaluation Phase**: Deploys to E2B Sandbox via `SandboxService`.
+  - **Debugger Feedback Loop**: On runtime/sandbox errors (`stderr`/failure), invokes `DebuggerService.diagnose_failure` and feeds root-cause fixes back to `CoderService.apply_fix`.
+  - **Hard Capped Retries**: Strict limit (`max_retries=2`) prevents runaway loops and token drain.
+  - **Failure Reporting**: If retries are exhausted without resolution, transitions to `FAILED` with a clear message surfacing the last error.
+- **FastAPI Integration** (`app/api/routes/generate.py` & `app/api/deps.py`):
+  - Wired `/generate` route to `OrchestratorService`.
+- **Unit & Integration Tests** (`tests/api/test_orchestrator.py` & `tests/api/test_generate.py`):
+  - Verified happy path (0 retries), automatic error recovery after 1 retry, and graceful failure after maximum retries.
+
+**Validation:**
+- 41/41 backend pytest tests passed in 1.65s.
+
+**Next:** Manual test: same 5 prompts from Phase 1, compare success rate before/after the debug loop.
