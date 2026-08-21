@@ -607,3 +607,46 @@ GEMINI_API_KEY=your_key_here
 - Live test generated a structured 4-step Pomodoro plan via the configured LLM provider in ~3s.
 
 **Next:** Implement Coder agent: takes a build step (+ prior file state), outputs file changes.
+
+---
+
+### Phase 2 — Implement Coder Agent (Step Execution & State Threading) - 2026-08-21
+
+**What:** Upgraded the Coder Agent (`CoderService`) to support multi-step iterative generation, state threading across steps, and targeted debug fix applications.
+
+**Key Implementation Details:**
+- **Schemas** (`app/schemas/debugger.py` & `app/schemas/__init__.py`):
+  - `DebugDiagnosis`: Contract containing `error_summary`, `root_cause`, `fix_instruction`, and `files_to_modify`.
+- **Step Execution & State Merging** (`app/services/coder.py`):
+  - `execute_step(step, plan, prior_files, prompt)`: Injects existing codebase files and step requirements into the model context. Parses generated files and merges them seamlessly with prior files.
+  - `apply_fix(files, diagnosis, prompt)`: Consumes root-cause analysis and actionable repair instructions from the Debugger agent to apply targeted fixes to existing code.
+  - `generate_files(prompt)`: Preserved single-pass generation for Phase 1 backwards compatibility.
+- **Unit Tests** (`tests/api/test_coder.py`):
+  - 6 tests validating initial step execution, state merging across steps, file overwriting/modification, debug fix application, and backwards compatibility.
+
+**Validation:**
+- 33/33 backend pytest tests passed in 1.86s.
+
+**Next:** Implement Debugger agent: takes sandbox stderr/stdout, outputs a diagnosis and a fix instruction for the Coder.
+
+---
+
+### Phase 2 — Implement Debugger Agent (Diagnosis & Fix Generation) - 2026-08-21
+
+**What:** Implemented the Debugger Agent (`DebuggerService`) to inspect sandbox runtime failures, crash tracebacks, and missing assets, generating structured root-cause diagnoses and targeted repair instructions for the Coder agent.
+
+**Key Implementation Details:**
+- **Debugger Service** (`app/services/debugger.py`):
+  - Ingests `files`, sandbox `stderr`, `stdout`, error descriptions, and original prompt.
+  - Prompts LLM for technical root-cause analysis and actionable repair instructions.
+  - Parses structured JSON response into `DebugDiagnosis` contract (`error_summary`, `root_cause`, `fix_instruction`, `files_to_modify`).
+  - Includes robust heuristic fallback diagnosis generator if LLM output format is ever non-standard, preventing pipeline crashes.
+- **Dependency Injection** (`app/api/deps.py`):
+  - Added `get_debugger_service(provider=Depends(get_provider))` dependency provider.
+- **Unit Tests** (`tests/api/test_debugger.py`):
+  - 5 tests covering valid JSON diagnoses, markdown-wrapped JSON, heuristic fallback generation, provider error handling, and end-to-end integration feeding diagnoses into `CoderService.apply_fix`.
+
+**Validation:**
+- 38/38 backend pytest tests passed in 1.98s.
+
+**Next:** Wire the retry loop: sandbox failure → Debugger → Coder → sandbox again, capped at 2-3 attempts.

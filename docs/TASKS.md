@@ -28,8 +28,8 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 
 - [x] Design the agent state machine (states: planning, coding, executing, debugging, done, failed) — write this out before coding it
 - [x] Implement Planner agent: takes user prompt, outputs an ordered list of build steps
-- [ ] Implement Coder agent: takes a build step (+ prior file state), outputs file changes
-- [ ] Implement Debugger agent: takes sandbox stderr/stdout, outputs a diagnosis and a fix instruction for the Coder
+- [x] Implement Coder agent: takes a build step (+ prior file state), outputs file changes
+- [x] Implement Debugger agent: takes sandbox stderr/stdout, outputs a diagnosis and a fix instruction for the Coder
 - [ ] Wire the retry loop: sandbox failure → Debugger → Coder → sandbox again, capped at 2-3 attempts
 - [ ] Add a clear "failed after N attempts" state surfaced to the user, showing the last error
 - [ ] Manual test: same 5 prompts from Phase 1, compare success rate before/after the debug loop

@@ -7,6 +7,7 @@ Follows the Dependency Injection pattern from the Auth0 FastAPI best practices g
 from fastapi import Depends
 from app.core.config import Settings, get_settings
 from app.services.coder import CoderService
+from app.services.debugger import DebuggerService
 from app.services.planner import PlannerService
 from app.services.sandbox import SandboxService
 from app.services.providers import LLMProvider, get_llm_provider
@@ -30,6 +31,11 @@ def get_planner_service(provider: LLMProvider = Depends(get_provider)) -> Planne
 def get_coder_service(provider: LLMProvider = Depends(get_provider)) -> CoderService:
     """Provide CoderService instance with injected LLM provider."""
     return CoderService(provider=provider)
+
+
+def get_debugger_service(provider: LLMProvider = Depends(get_provider)) -> DebuggerService:
+    """Provide DebuggerService instance with injected LLM provider."""
+    return DebuggerService(provider=provider)
 
 
 def get_sandbox_service(settings: Settings = Depends(get_app_settings)) -> SandboxService:
