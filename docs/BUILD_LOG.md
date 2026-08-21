@@ -563,3 +563,21 @@ GEMINI_API_KEY=your_key_here
 - `npm run build` compiled all routes cleanly.
 
 **Next:** Phase 2 — Multi-agent orchestration (Design the agent state machine: planning, coding, executing, debugging, done, failed).
+
+---
+
+### Phase 2 — Multi-Agent State Machine Specification - 2026-08-21
+
+**What:** Designed and documented the complete finite state machine (FSM) architecture for multi-agent orchestration across Planner, Coder, Sandbox, and Debugger agents.
+
+**Key Architecture Decisions (`docs/STATE_MACHINE.md`):**
+- **Explicit States:** `PLANNING` → `CODING` → `EXECUTING` → `DEBUGGING` → `DONE` / `FAILED`.
+- **Shared Execution Context:** Unified `AgentExecutionContext` tracking current state, structured plan, files dictionary, retry counts (capped at 2-3 retries), sandbox execution outputs (`stdout`/`stderr`), and debug diagnostic history.
+- **Feedback & Retry Loop:** On sandbox execution failure (`stderr`/crash), the `Debugger` agent produces a root-cause diagnosis and targeted fix instructions, feeding context back to the `Coder` agent for auto-repair.
+- **Explainable Control Flow:** Deterministic state transitions implemented as a clean Python orchestration service rather than opaque agent frameworks, ensuring testability, predictable cost controls, and interview explainability.
+
+**Validation:**
+- Created comprehensive architecture design in `docs/STATE_MACHINE.md` with Mermaid diagram, state definitions, transitions, data schemas, and tradeoff analysis.
+- Checked off task 1 of Phase 2 in `docs/TASKS.md`.
+
+**Next:** Implement Planner agent: takes user prompt, outputs an ordered list of build steps.
