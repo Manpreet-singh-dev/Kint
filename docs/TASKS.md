@@ -27,7 +27,7 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 ## Phase 2 — Multi-agent orchestration (Week 2)
 
 - [x] Design the agent state machine (states: planning, coding, executing, debugging, done, failed) — write this out before coding it
-- [ ] Implement Planner agent: takes user prompt, outputs an ordered list of build steps
+- [x] Implement Planner agent: takes user prompt, outputs an ordered list of build steps
 - [ ] Implement Coder agent: takes a build step (+ prior file state), outputs file changes
 - [ ] Implement Debugger agent: takes sandbox stderr/stdout, outputs a diagnosis and a fix instruction for the Coder
 - [ ] Wire the retry loop: sandbox failure → Debugger → Coder → sandbox again, capped at 2-3 attempts

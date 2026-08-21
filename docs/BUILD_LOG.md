@@ -581,3 +581,29 @@ GEMINI_API_KEY=your_key_here
 - Checked off task 1 of Phase 2 in `docs/TASKS.md`.
 
 **Next:** Implement Planner agent: takes user prompt, outputs an ordered list of build steps.
+
+---
+
+### Phase 2 — Implement Planner Agent - 2026-08-21
+
+**What:** Implemented the Planner Agent (`PlannerService`) responsible for decomposing natural language user prompts into structured architecture plans with ordered build steps and file manifests.
+
+**Key Implementation Details:**
+- **Schemas** (`app/schemas/plan.py` & `app/schemas/__init__.py`):
+  - `PlanStep`: Contains `step_number`, `title`, `description`, and `target_files`.
+  - `Plan`: Contains `title`, `summary`, `target_files`, and `steps: List[PlanStep]`.
+- **Planner Agent Service** (`app/services/planner.py`):
+  - Provider-agnostic implementation injecting `LLMProvider`.
+  - Structured prompt enforcing strict JSON output for application architecture and discrete steps.
+  - Robust parser supporting markdown code blocks (` ```json `), raw JSON, and auto-insertion of `index.html` into file manifests.
+  - Heuristic fallback plan builder if LLM output format is ever non-standard, preventing pipeline crashes.
+- **Dependency Injection** (`app/api/deps.py`):
+  - Added `get_planner_service(provider=Depends(get_provider))` for FastAPI route and service consumption.
+- **Unit Tests** (`tests/api/test_planner.py`):
+  - 6 comprehensive tests covering valid plans, markdown JSON blocks, automatic `index.html` enforcement, fallback generation, and error handling.
+
+**Validation:**
+- 27/27 backend pytest tests passed in 1.57s.
+- Live test generated a structured 4-step Pomodoro plan via the configured LLM provider in ~3s.
+
+**Next:** Implement Coder agent: takes a build step (+ prior file state), outputs file changes.
