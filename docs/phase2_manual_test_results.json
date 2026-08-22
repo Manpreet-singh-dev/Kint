@@ -4,54 +4,99 @@
     "id": "prompt_1_counter_stopwatch",
     "category": "Single-Page Utility / State",
     "prompt": "Build a clean, modern stopwatch and countdown timer app with lap times, sound alerts (using Web Audio API), start/pause/reset buttons, and a dark mode toggle.",
-    "final_state": null,
-    "total_time_sec": 16.37,
-    "plan_title": null,
-    "plan_step_count": 0,
-    "plan_target_files": [],
-    "files_generated": [],
-    "file_sizes": {},
-    "has_index_html": false,
-    "has_css": false,
+    "final_state": "done",
+    "total_time_sec": 38.53,
+    "plan_title": "Modern Stopwatch & Countdown Timer",
+    "plan_step_count": 6,
+    "plan_target_files": [
+      "index.html",
+      "style.css",
+      "script.js"
+    ],
+    "files_generated": [
+      "index.html",
+      "style.css"
+    ],
+    "file_sizes": {
+      "index.html": 2827,
+      "style.css": 3927
+    },
+    "has_index_html": true,
+    "has_css": true,
     "has_js": false,
     "retries_used": 0,
     "debug_diagnoses_count": 0,
     "debug_summaries": [],
-    "sandbox_success": false,
-    "preview_url": null,
-    "sandbox_id": null,
-    "message": "",
-    "errors": [
-      "No code files generated for step 1 ('HTML Structure & Layout')."
-    ],
-    "file_contents_summary": {}
+    "sandbox_success": true,
+    "preview_url": "https://3000-iz0xzp90bhg1iwgrzk0ch.e2b.app",
+    "sandbox_id": "iz0xzp90bhg1iwgrzk0ch",
+    "message": "Generated 2 file(s) and deployed to sandbox. Preview is live!",
+    "errors": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 67,
+        "chars": 2827,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 207,
+        "chars": 3927,
+        "first_50_chars": "/* ==== Reset & Base ==== */ *, *::before, *::afte"
+      }
+    }
   },
   {
     "test_num": 2,
     "id": "prompt_2_kanban_todo",
     "category": "CRUD / Interactive State / LocalStorage",
     "prompt": "Build a Kanban board with 3 columns (To Do, In Progress, Done), task cards with priority badges (Low, Med, High), drag-and-drop support, ability to add/edit/delete tasks, and persist state in localStorage.",
-    "final_state": null,
-    "total_time_sec": 26.95,
-    "plan_title": null,
-    "plan_step_count": 0,
-    "plan_target_files": [],
-    "files_generated": [],
-    "file_sizes": {},
-    "has_index_html": false,
-    "has_css": false,
-    "has_js": false,
+    "final_state": "done",
+    "total_time_sec": 57.36,
+    "plan_title": "Kanban Board with Drag\u2011Drop and Persistence",
+    "plan_step_count": 5,
+    "plan_target_files": [
+      "index.html",
+      "style.css",
+      "script.js"
+    ],
+    "files_generated": [
+      "index.html",
+      "style.css",
+      "script.js"
+    ],
+    "file_sizes": {
+      "index.html": 2469,
+      "style.css": 4283,
+      "script.js": 6272
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": true,
     "retries_used": 0,
     "debug_diagnoses_count": 0,
     "debug_summaries": [],
-    "sandbox_success": false,
-    "preview_url": null,
-    "sandbox_id": null,
-    "message": "",
-    "errors": [
-      "No code files generated for step 1 ('HTML Structure & Layout')."
-    ],
-    "file_contents_summary": {}
+    "sandbox_success": true,
+    "preview_url": "https://3000-inhyza43y424oqef1n68m.e2b.app",
+    "sandbox_id": "inhyza43y424oqef1n68m",
+    "message": "Generated 3 file(s) and deployed to sandbox. Preview is live!",
+    "errors": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 67,
+        "chars": 2469,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 208,
+        "chars": 4283,
+        "first_50_chars": "/* ==== CSS Variables ==== */ :root {     --bg-pri"
+      },
+      "script.js": {
+        "lines": 226,
+        "chars": 6272,
+        "first_50_chars": "/* ==== Utility Functions ==== */ const $ = (sel) "
+      }
+    }
   },
   {
     "test_num": 3,
@@ -59,7 +104,7 @@
     "category": "Data / Visualization / Canvas",
     "prompt": "Build a personal expense tracker app with a summary card (total income, expenses, net balance), add transaction form with categories, transaction history list with filtering and delete, and an interactive HTML5 Canvas pie/bar chart showing category breakdowns.",
     "final_state": null,
-    "total_time_sec": 6.77,
+    "total_time_sec": 46.83,
     "plan_title": null,
     "plan_step_count": 0,
     "plan_target_files": [],
@@ -76,7 +121,7 @@
     "sandbox_id": null,
     "message": "",
     "errors": [
-      "No code files generated for step 1 ('HTML Structure & Layout')."
+      "Groq API call failed (HTTP 429): Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kpkex8tffxxvjr78s4j7cc46` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 3465, Requested 4905. Please try again in 2.775s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing"
     ],
     "file_contents_summary": {}
   },
@@ -85,27 +130,53 @@
     "id": "prompt_4_snake_game",
     "category": "Canvas Game / Real-time Loop / Input Handling",
     "prompt": "Build a retro Snake arcade game using HTML5 Canvas with smooth controls (arrow keys and on-screen directional buttons for mobile), score tracking, high score saved in localStorage, speed levels, pause/resume, and game over screen with restart.",
-    "final_state": null,
-    "total_time_sec": 28.68,
-    "plan_title": null,
-    "plan_step_count": 0,
-    "plan_target_files": [],
-    "files_generated": [],
-    "file_sizes": {},
-    "has_index_html": false,
-    "has_css": false,
-    "has_js": false,
+    "final_state": "done",
+    "total_time_sec": 25.59,
+    "plan_title": "Retro Snake Arcade Game",
+    "plan_step_count": 6,
+    "plan_target_files": [
+      "index.html",
+      "style.css",
+      "script.js"
+    ],
+    "files_generated": [
+      "index.html",
+      "style.css",
+      "script.js"
+    ],
+    "file_sizes": {
+      "index.html": 1661,
+      "style.css": 2839,
+      "script.js": 8128
+    },
+    "has_index_html": true,
+    "has_css": true,
+    "has_js": true,
     "retries_used": 0,
     "debug_diagnoses_count": 0,
     "debug_summaries": [],
-    "sandbox_success": false,
-    "preview_url": null,
-    "sandbox_id": null,
-    "message": "",
-    "errors": [
-      "No code files generated for step 1 ('HTML Structure & Layout')."
-    ],
-    "file_contents_summary": {}
+    "sandbox_success": true,
+    "preview_url": "https://3000-izrwxf4kr01jkj71qpzkb.e2b.app",
+    "sandbox_id": "izrwxf4kr01jkj71qpzkb",
+    "message": "Generated 3 file(s) and deployed to sandbox. Preview is live!",
+    "errors": [],
+    "file_contents_summary": {
+      "index.html": {
+        "lines": 52,
+        "chars": 1661,
+        "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 141,
+        "chars": 2839,
+        "first_50_chars": "/* ==== CSS Variables (retro palette) ==== */ :roo"
+      },
+      "script.js": {
+        "lines": 252,
+        "chars": 8128,
+        "first_50_chars": "/* ==== Retro Snake Arcade \u2013 Vanilla JS ==== */  ("
+      }
+    }
   },
   {
     "test_num": 5,
@@ -113,38 +184,50 @@
     "category": "Multi-component / Rich Text / File Export",
     "prompt": "Build a split-screen Markdown live editor and previewer with syntax highlighting, word and character counters, table generation toolbar buttons, and the ability to export the document as a .md file or download as HTML.",
     "final_state": "done",
-    "total_time_sec": 67.17,
+    "total_time_sec": 38.21,
     "plan_title": "Split\u2011Screen Markdown Editor & Previewer",
-    "plan_step_count": 4,
+    "plan_step_count": 5,
     "plan_target_files": [
       "index.html",
       "style.css",
       "script.js"
     ],
     "files_generated": [
-      "index.html"
+      "index.html",
+      "style.css",
+      "script.js"
     ],
     "file_sizes": {
-      "index.html": 2072
+      "index.html": 1797,
+      "style.css": 3094,
+      "script.js": 8361
     },
     "has_index_html": true,
-    "has_css": false,
-    "has_js": false,
+    "has_css": true,
+    "has_js": true,
     "retries_used": 0,
     "debug_diagnoses_count": 0,
     "debug_summaries": [],
     "sandbox_success": true,
-    "preview_url": "https://3000-ihnnkag0756qi7gzbhedn.e2b.app",
-    "sandbox_id": "ihnnkag0756qi7gzbhedn",
-    "message": "Generated 1 file(s) and deployed to sandbox. Preview is live!",
-    "errors": [
-      "'charmap' codec can't encode character '\\u2011' in position 13: character maps to <undefined>"
-    ],
+    "preview_url": "https://3000-iwh47qp9o4gucrgrbq62f.e2b.app",
+    "sandbox_id": "iwh47qp9o4gucrgrbq62f",
+    "message": "Generated 3 file(s) and deployed to sandbox. Preview is live!",
+    "errors": [],
     "file_contents_summary": {
       "index.html": {
-        "lines": 65,
-        "chars": 2072,
+        "lines": 55,
+        "chars": 1797,
         "first_50_chars": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta "
+      },
+      "style.css": {
+        "lines": 167,
+        "chars": 3094,
+        "first_50_chars": "/* ==== CSS Variables (Light / Dark) ==== */ :root"
+      },
+      "script.js": {
+        "lines": 241,
+        "chars": 8361,
+        "first_50_chars": "/* ==== Split\u2011Screen Markdown Editor ==== */ (() ="
       }
     }
   }

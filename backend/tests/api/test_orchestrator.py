@@ -23,7 +23,7 @@ async def test_orchestrator_happy_path_no_retries():
     )
 
     mock_coder = MagicMock()
-    mock_coder.execute_step.return_value = {
+    mock_coder.generate_files_from_plan.return_value = {
         "index.html": "<!DOCTYPE html><html><body><h1>Timer</h1></body></html>",
         "style.css": "body { color: white; }",
     }
@@ -72,8 +72,8 @@ async def test_orchestrator_recovers_after_debug_retry():
     )
 
     mock_coder = MagicMock()
-    # Step 1 returns buggy code
-    mock_coder.execute_step.return_value = {
+    # Initial code generation returns buggy code
+    mock_coder.generate_files_from_plan.return_value = {
         "index.html": "<html><body><script src='script.js'></script></body></html>",
         "script.js": "calc.init()",  # Buggy: calc not defined
     }
@@ -142,7 +142,7 @@ async def test_orchestrator_fails_gracefully_after_max_retries():
     )
 
     mock_coder = MagicMock()
-    mock_coder.execute_step.return_value = {"index.html": "<html><body>Broken</body></html>"}
+    mock_coder.generate_files_from_plan.return_value = {"index.html": "<html><body>Broken</body></html>"}
     mock_coder.apply_fix.return_value = {"index.html": "<html><body>Still Broken</body></html>"}
 
     # Sandbox consistently returns errors across initial attempt + 2 retries

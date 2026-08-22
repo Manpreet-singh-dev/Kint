@@ -32,7 +32,7 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 - [x] Implement Debugger agent: takes sandbox stderr/stdout, outputs a diagnosis and a fix instruction for the Coder
 - [x] Wire the retry loop: sandbox failure → Debugger → Coder → sandbox again, capped at 2-3 attempts
 - [x] Add a clear "failed after N attempts" state surfaced to the user, showing the last error
-- [ ] Manual test: same 5 prompts from Phase 1, compare success rate before/after the debug loop
+- [x] Manual test: same 5 prompts from Phase 1, compare success rate before/after the debug loop
 
 ## Phase 3 — RAG and prompt caching (Week 3)
 

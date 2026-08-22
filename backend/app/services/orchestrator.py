@@ -106,17 +106,11 @@ class OrchestratorService:
         # STEP 2: INITIAL CODING
         # -------------------------------------------------------------
         context.current_state = AgentState.CODING
-        if context.plan and context.plan.steps:
-            # Iteratively execute plan steps
-            accumulated_files: Dict[str, str] = {}
-            for step in context.plan.steps:
-                accumulated_files = self.coder.execute_step(
-                    step=step,
-                    plan=context.plan,
-                    prior_files=accumulated_files,
-                    prompt=context.prompt,
-                )
-            context.files = accumulated_files
+        if context.plan:
+            context.files = self.coder.generate_files_from_plan(
+                plan=context.plan,
+                prompt=context.prompt,
+            )
         else:
             # Direct generation fallback
             context.files = self.coder.generate_files(context.prompt)

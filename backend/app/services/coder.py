@@ -206,6 +206,65 @@ class CoderService:
                 raise
             raise CodeGenerationError(f"Failed to apply debug fix: {str(e)}")
 
+    def generate_files_from_plan(self, plan: Plan, prompt: str) -> Dict[str, str]:
+        """
+        Generate complete, cohesive application files grounded in the structured Plan.
+
+        Args:
+            plan: The structured Plan formulated by the Planner agent.
+            prompt: The original user prompt.
+
+        Returns:
+            Dictionary mapping filenames to full source code.
+
+        Raises:
+            CodeGenerationError: If generation fails or index.html is missing.
+        """
+        steps_summary = "\n".join(
+            f"Step {s.step_number}: {s.title} - {s.description} (Target: {', '.join(s.target_files)})"
+            for s in plan.steps
+        )
+        plan_prompt = f"""Original User Request:
+{prompt}
+
+Application Plan:
+Title: {plan.title}
+Summary: {plan.summary}
+Target Files: {', '.join(plan.target_files)}
+
+Architecture & Implementation Steps:
+{steps_summary}
+
+Please generate the complete, production-ready code files implementing this plan. Output all files using ```filename.ext code blocks."""
+
+        try:
+            response_text = self.provider.generate_text(
+                system_prompt=CODER_SYSTEM_PROMPT,
+                user_prompt=plan_prompt,
+            )
+
+            files = self._parse_files_from_response(
+                response=response_text,
+                expected_target_files=plan.target_files,
+            )
+
+            if not files:
+                raise CodeGenerationError(
+                    "No code files generated from the architectural plan."
+                )
+
+            if "index.html" not in files:
+                raise CodeGenerationError(
+                    "Generated code must include an index.html file as the entry point."
+                )
+
+            return files
+
+        except Exception as e:
+            if isinstance(e, CodeGenerationError):
+                raise
+            raise CodeGenerationError(f"Failed to generate code from plan: {str(e)}")
+
     def generate_files(self, prompt: str) -> Dict[str, str]:
         """
         Generate complete code files from a user prompt (Phase 1 backwards compatibility).
