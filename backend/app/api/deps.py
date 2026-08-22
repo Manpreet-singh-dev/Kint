@@ -81,6 +81,17 @@ def get_sandbox_service(settings: Settings = Depends(get_app_settings)) -> Sandb
     return SandboxService(settings=settings)
 
 
+from app.services.chat_grounding import ChatGroundingService
+
+
+def get_chat_grounding_service(
+    provider: LLMProvider = Depends(get_provider),
+    app_indexer: AppIndexerService = Depends(get_app_indexer_service),
+) -> ChatGroundingService:
+    """Provide ChatGroundingService instance for grounded codebase Q&A."""
+    return ChatGroundingService(provider=provider, app_indexer=app_indexer)
+
+
 def get_orchestrator_service(
     planner: PlannerService = Depends(get_planner_service),
     coder: CoderService = Depends(get_coder_service),

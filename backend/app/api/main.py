@@ -5,6 +5,7 @@ Follows the Auth0 FastAPI structure pattern: `app/api/main.py`.
 """
 
 from fastapi import APIRouter
+from app.api.routes.chat import router as chat_router
 from app.api.routes.generate import router as generate_router
 from app.api.routes.health import router as health_router
 from app.api.routes.sandbox import router as sandbox_router
@@ -15,3 +16,4 @@ api_router = APIRouter()
 api_router.include_router(health_router)
 api_router.include_router(generate_router)
 api_router.include_router(sandbox_router)
+api_router.include_router(chat_router)

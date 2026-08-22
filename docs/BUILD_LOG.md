@@ -805,3 +805,28 @@ GEMINI_API_KEY=your_key_here
 - 54/54 backend pytest tests passed in 13.73s.
 
 **Next:** Add a "chat about this app" endpoint that answers questions grounded in those embeddings.
+
+---
+
+### Phase 3 — "Chat About This App" Grounded Q&A Endpoint - 2026-08-22
+
+**What:** Implemented conversational Q&A endpoint (`POST /chat` and `POST /api/v1/chat`) enabling users to ask questions, understand logic, and plan extensions for generated web apps with answers strictly grounded in pgvector code embeddings.
+
+**Key Implementation Details:**
+- **Schemas** (`app/schemas/chat.py` & `app/schemas/__init__.py`):
+  - `ChatRequest`: Validates `app_id`, `message`, and optional `history` (`ChatMessage`).
+  - `CodeSourceCitation`: Exposes referenced `file_name`, `section_name`, code content excerpt, and `similarity_score`.
+  - `ChatResponse`: Returns the AI response along with source citations.
+- **Chat Grounding Service** (`app/services/chat_grounding.py`):
+  - Queries `AppIndexerService.query_app_code` to retrieve semantic code snippets for the given `app_id`.
+  - Injects retrieved snippets as grounding context into the prompt alongside conversation history.
+  - Generates technical, accurate answers citing filenames and functions.
+- **API Router** (`app/api/routes/chat.py` & `app/api/main.py`):
+  - Registered `/chat` route under root and `/api/v1/chat` prefix.
+- **Unit & Integration Tests** (`tests/api/test_chat.py`):
+  - 3 tests validating grounding prompt generation, history preservation, HTTP 200 payload responses, and 422 validation handling.
+
+**Validation:**
+- 57/57 backend pytest tests passed in 14.08s.
+
+**Next:** Enable prompt caching on the static system prompt and retrieved doc context in Claude API calls.
