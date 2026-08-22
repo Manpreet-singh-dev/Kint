@@ -57,6 +57,46 @@ class Settings(BaseSettings):
     GROQ_MAX_TOKENS: int = 4096
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
 
+    # PostgreSQL + pgvector settings
+    POSTGRES_USER: str = "kint"
+    POSTGRES_PASSWORD: str = "kintpassword"
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "kint_db"
+    DATABASE_URL: str | None = None
+
+    # Embedding model configuration
+    EMBEDDING_DIMENSION: int = 1536
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+
+    @property
+    def sync_database_url(self) -> str:
+        """Construct synchronous SQLAlchemy database URL."""
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+            elif url.startswith("postgresql+asyncpg://"):
+                url = url.replace("postgresql+asyncpg://", "postgresql+psycopg2://", 1)
+            elif url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+            return url
+        return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+
+    @property
+    def async_database_url(self) -> str:
+        """Construct asynchronous SQLAlchemy database URL."""
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql+psycopg2://"):
+                url = url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+
     @field_validator("LLM_PROVIDER", mode="before")
     @classmethod
     def validate_llm_provider(cls, v: str) -> str:

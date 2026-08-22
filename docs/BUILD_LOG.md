@@ -704,3 +704,31 @@ GEMINI_API_KEY=your_key_here
 - Live test results persisted to `docs/phase2_manual_test_results.json`.
 
 **Next:** Phase 3 — RAG and prompt caching (Week 3: Stand up Postgres + pgvector).
+
+---
+
+### Phase 3 — Stand up Postgres + pgvector - 2026-08-22
+
+**What:** Stood up the PostgreSQL + `pgvector` persistence layer and vector similarity engine for semantic search over documentation chunks and generated application files.
+
+**Key Implementation Details:**
+- **Container Infrastructure** (`docker-compose.yml`):
+  - Configured `pgvector/pgvector:pg16` service with persistent named volume `kint_pgdata`, environment-configurable credentials, and automated healthchecks.
+- **Dependencies** (`backend/pyproject.toml`):
+  - Added `sqlalchemy>=2.0.0`, `pgvector>=0.3.0`, `asyncpg>=0.29.0`, `psycopg2-binary>=2.9.9`.
+- **Database Architecture** (`app/db/session.py` & `app/db/models.py`):
+  - Created `DocumentChunk` model featuring vector column `Vector(1536)` (or configurable dimension), collection categorization, metadata JSON storage, and primary key indexing.
+  - Implemented synchronous and asynchronous session factories (`SyncSessionLocal` & `AsyncSessionLocal`) with connection pooling.
+- **Migration & Initialization** (`app/db/init_db.py`):
+  - Automated `CREATE EXTENSION IF NOT EXISTS vector;` and table creation script.
+- **Vector Store Engine** (`app/services/vector_store.py`):
+  - `insert_chunk` & `insert_chunks_batch`: Batch embedding insertion into PostgreSQL.
+  - `search_similar`: Cosine distance similarity search (`<=>` operator) with score thresholding and limit controls.
+  - **Graceful Degradation Fallback**: In-memory cosine calculation fallback for offline, testing, or containerless execution.
+- **Unit & Integration Tests** (`tests/db/test_vector_store.py`):
+  - 5 tests validating model serialization, cosine distance ranking, score cutoff filtering, and memory math.
+
+**Validation:**
+- 46/46 backend pytest tests passed in 5.50s.
+
+**Next:** Curate a small set of framework docs/patterns (FastAPI + Next.js) and embed them.
