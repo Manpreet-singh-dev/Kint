@@ -732,3 +732,28 @@ GEMINI_API_KEY=your_key_here
 - 46/46 backend pytest tests passed in 5.50s.
 
 **Next:** Curate a small set of framework docs/patterns (FastAPI + Next.js) and embed them.
+
+---
+
+### Phase 3 — Curate Framework Docs/Patterns & Embedding Pipeline - 2026-08-22
+
+**What:** Curated production-grade framework patterns for FastAPI, Next.js / React 19, and Modern Vanilla JS / HTML5 Web APIs, and implemented the semantic chunking, embedding, and vector ingestion pipeline (`EmbeddingService` & `KnowledgeBaseService`).
+
+**Key Implementation Details:**
+- **Curated Knowledge Base** (`app/knowledge/frameworks/`):
+  - `fastapi_patterns.md`: Dependency injection (`Depends()`), custom structured exception handlers, production CORS middleware.
+  - `nextjs_patterns.md`: App router client/server boundaries, SSR-safe `localStorage` synchronization hooks, responsive pointer drag split-views.
+  - `vanilla_web_patterns.md`: High-DPI HTML5 Canvas animation loops (`requestAnimationFrame`), Web Audio API synthesized sound generator, zero-dependency HTML5 drag-and-drop Kanban state persistence.
+- **Embedding Generation Engine** (`app/services/embedding.py`):
+  - Ingests text strings and produces unit-normalized dense float vectors of dimension 1536.
+  - Supports Google Gemini `text-embedding-004` / GenAI SDK with automatic fallback to position-invariant n-gram / subword dense hash vectorizer.
+- **Knowledge Ingestion & Retrieval Service** (`app/services/knowledge_base.py`):
+  - `seed_framework_docs`: Parses markdown files by sections, extracts section/document metadata, generates batch embeddings, and stores them in Postgres/pgvector collection `framework_patterns`.
+  - `query_patterns`: Retrieves top-$k$ most relevant architectural pattern chunks with optional framework category filtering.
+- **Unit & Integration Tests** (`tests/services/test_knowledge_base.py`):
+  - 4 tests validating embedding shapes, batch processing, markdown section chunking, vector ingestion, and framework filtering.
+
+**Validation:**
+- 50/50 backend pytest tests passed in 10.88s.
+
+**Next:** Retrieve top-k relevant chunks before each Coder agent call, inject into its context.

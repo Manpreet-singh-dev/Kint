@@ -37,7 +37,7 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 ## Phase 3 — RAG and prompt caching (Week 3)
 
 - [x] Stand up Postgres + pgvector
-- [ ] Curate a small set of framework docs/patterns (FastAPI + Next.js) and embed them
+- [x] Curate a small set of framework docs/patterns (FastAPI + Next.js) and embed them
 - [ ] Retrieve top-k relevant chunks before each Coder agent call, inject into its context
 - [ ] Embed the files of a freshly generated app after each successful build
 - [ ] Add a "chat about this app" endpoint that answers questions grounded in those embeddings
