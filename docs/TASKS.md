@@ -38,7 +38,7 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 
 - [x] Stand up Postgres + pgvector
 - [x] Curate a small set of framework docs/patterns (FastAPI + Next.js) and embed them
-- [ ] Retrieve top-k relevant chunks before each Coder agent call, inject into its context
+- [x] Retrieve top-k relevant chunks before each Coder agent call, inject into its context
 - [ ] Embed the files of a freshly generated app after each successful build
 - [ ] Add a "chat about this app" endpoint that answers questions grounded in those embeddings
 - [ ] Enable prompt caching on the static system prompt and retrieved doc context in Claude API calls

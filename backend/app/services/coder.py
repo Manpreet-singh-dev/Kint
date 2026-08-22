@@ -1,26 +1,28 @@
 """
-Coder agent service (Phase 2 Multi-Agent Orchestration).
+Coder agent service (Phase 2 Multi-Agent Orchestration & Phase 3 RAG Augmentation).
 
 Role in Pipeline:
 The Coder agent receives structured build steps from the Planner agent along with
-any prior file state. It generates new files and modifies existing files to iteratively
-construct the application.
+any prior file state. Before generating code, it retrieves relevant framework documentation
+and architectural patterns from the Vector Knowledge Base (RAG context) to ensure
+modern, robust implementations.
 
 During error recovery in the retry loop, the Coder agent also consumes structured
 diagnoses from the Debugger agent to apply targeted bug fixes to the codebase.
 """
 
 import re
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from app.core.exceptions import CodeGenerationError
 from app.schemas.debugger import DebugDiagnosis
 from app.schemas.plan import Plan, PlanStep
+from app.services.knowledge_base import KnowledgeBaseService
 from app.services.providers.base import LLMProvider
 
 
 CODER_SYSTEM_PROMPT = """You are an expert web developer and coder assistant.
-Your job is to generate clean, complete, working web application code based on build instructions.
+Your job is to generate clean, complete, working web application code based on build instructions and architectural patterns.
 
 Rules for output:
 1. Generate complete, working code for HTML, CSS, and JavaScript files as needed.
@@ -30,7 +32,8 @@ file content here
 ```
 3. Use modern, responsive CSS, semantic HTML5, and vanilla JavaScript.
 4. When prior files are provided, maintain consistency with existing code and integrate your changes cleanly.
-5. Never output placeholders or truncated code (like "...rest of code unchanged..."). Always provide the full file contents.
+5. When relevant architectural patterns or best practices (RAG context) are provided, follow their structure and techniques.
+6. Never output placeholders or truncated code (like "...rest of code unchanged..."). Always provide the full file contents.
 """
 
 STEP_EXECUTION_PROMPT_TEMPLATE = """You are executing Step {step_number} of an application build plan.
@@ -45,7 +48,7 @@ Current Step:
 - Step {step_number}: {step_title}
 - Instructions: {step_description}
 - Target Files: {target_files}
-
+{rag_section}
 Current Codebase Files:
 {prior_files_formatted}
 
@@ -68,19 +71,37 @@ Fix Instructions:
 
 Files Requiring Modification:
 {files_to_modify}
-
+{rag_section}
 Current Codebase Files:
 {current_files_formatted}
 
 Please apply the necessary fixes. Output all modified files in full using ```filename.ext code blocks.
 """
 
+PLAN_GENERATION_PROMPT_TEMPLATE = """Original User Request:
+{prompt}
+
+Application Plan:
+Title: {plan_title}
+Summary: {plan_summary}
+Target Files: {target_files}
+
+Architecture & Implementation Steps:
+{steps_summary}
+{rag_section}
+Please generate the complete, production-ready code files implementing this plan. Output all files using ```filename.ext code blocks."""
+
 
 class CoderService:
-    """Service responsible for generating and modifying code files."""
+    """Service responsible for generating and modifying code files with RAG augmentation."""
 
-    def __init__(self, provider: LLMProvider):
+    def __init__(
+        self,
+        provider: LLMProvider,
+        knowledge_base: Optional[KnowledgeBaseService] = None,
+    ):
         self.provider = provider
+        self.knowledge_base = knowledge_base
 
     def execute_step(
         self,
@@ -108,6 +129,10 @@ class CoderService:
         prompt_str = prompt or (plan.summary if plan else step.title)
         plan_summary = plan.summary if plan else "Multi-step web application build."
 
+        # Retrieve RAG context for step
+        rag_context = self._retrieve_rag_context(f"{step.title} {step.description}", limit=2)
+        rag_section = f"\nRelevant Framework & Architecture Patterns (RAG Context):\n{rag_context}\n" if rag_context else ""
+
         user_prompt = STEP_EXECUTION_PROMPT_TEMPLATE.format(
             step_number=step.step_number,
             step_title=step.title,
@@ -115,6 +140,7 @@ class CoderService:
             target_files=", ".join(step.target_files) if step.target_files else "as needed",
             prompt=prompt_str,
             plan_summary=plan_summary,
+            rag_section=rag_section,
             prior_files_formatted=self._format_files_for_prompt(current_files),
         )
 
@@ -169,12 +195,17 @@ class CoderService:
         updated_files = dict(files)
         prompt_str = prompt or "Web application repair."
 
+        # Retrieve RAG context for bug fix
+        rag_context = self._retrieve_rag_context(f"{diagnosis.error_summary} {diagnosis.fix_instruction}", limit=2)
+        rag_section = f"\nRelevant Framework & Repair Patterns (RAG Context):\n{rag_context}\n" if rag_context else ""
+
         user_prompt = DEBUG_FIX_PROMPT_TEMPLATE.format(
             prompt=prompt_str,
             error_summary=diagnosis.error_summary,
             root_cause=diagnosis.root_cause,
             fix_instruction=diagnosis.fix_instruction,
             files_to_modify=", ".join(diagnosis.files_to_modify) if diagnosis.files_to_modify else "All relevant files",
+            rag_section=rag_section,
             current_files_formatted=self._format_files_for_prompt(updated_files),
         )
 
@@ -208,7 +239,7 @@ class CoderService:
 
     def generate_files_from_plan(self, plan: Plan, prompt: str) -> Dict[str, str]:
         """
-        Generate complete, cohesive application files grounded in the structured Plan.
+        Generate complete, cohesive application files grounded in the structured Plan and RAG context.
 
         Args:
             plan: The structured Plan formulated by the Planner agent.
@@ -224,18 +255,19 @@ class CoderService:
             f"Step {s.step_number}: {s.title} - {s.description} (Target: {', '.join(s.target_files)})"
             for s in plan.steps
         )
-        plan_prompt = f"""Original User Request:
-{prompt}
 
-Application Plan:
-Title: {plan.title}
-Summary: {plan.summary}
-Target Files: {', '.join(plan.target_files)}
+        # Retrieve top-k framework patterns relevant to the entire prompt and plan
+        rag_context = self._retrieve_rag_context(f"{prompt} {plan.title} {plan.summary}", limit=2)
+        rag_section = f"\nRelevant Architecture & Framework Patterns (RAG Context):\n{rag_context}\n" if rag_context else ""
 
-Architecture & Implementation Steps:
-{steps_summary}
-
-Please generate the complete, production-ready code files implementing this plan. Output all files using ```filename.ext code blocks."""
+        plan_prompt = PLAN_GENERATION_PROMPT_TEMPLATE.format(
+            prompt=prompt,
+            plan_title=plan.title,
+            plan_summary=plan.summary,
+            target_files=", ".join(plan.target_files),
+            steps_summary=steps_summary,
+            rag_section=rag_section,
+        )
 
         try:
             response_text = self.provider.generate_text(
@@ -279,9 +311,14 @@ Please generate the complete, production-ready code files implementing this plan
             CodeGenerationError: If generation fails or no index.html is present.
         """
         try:
+            # Retrieve RAG context
+            rag_context = self._retrieve_rag_context(prompt, limit=2)
+            rag_section = f"\nRelevant Framework Patterns (RAG Context):\n{rag_context}\n\n" if rag_context else ""
+            user_prompt = f"{rag_section}{prompt}"
+
             response_text = self.provider.generate_text(
                 system_prompt=CODER_SYSTEM_PROMPT,
-                user_prompt=prompt,
+                user_prompt=user_prompt,
             )
 
             files = self._parse_files_from_response(response_text)
@@ -302,6 +339,25 @@ Please generate the complete, production-ready code files implementing this plan
             if isinstance(e, CodeGenerationError):
                 raise
             raise CodeGenerationError(f"Failed to generate code: {str(e)}")
+
+    def _retrieve_rag_context(self, query: str, limit: int = 2) -> str:
+        """Retrieve and format top-k pattern chunks from the knowledge base."""
+        if not self.knowledge_base:
+            return ""
+
+        try:
+            results = self.knowledge_base.query_patterns(query=query, limit=limit)
+            if not results:
+                return ""
+
+            formatted_chunks = []
+            for r in results:
+                title = r.metadata.get("section_title") or r.metadata.get("document_title") or r.document_id
+                formatted_chunks.append(f"--- Pattern: {title} ---\n{r.content}")
+
+            return "\n\n".join(formatted_chunks)
+        except Exception:
+            return ""
 
     def _format_files_for_prompt(self, files: Dict[str, str]) -> str:
         """Format existing files for inclusion in LLM prompt context."""

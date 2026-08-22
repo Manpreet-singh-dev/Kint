@@ -161,3 +161,37 @@ h1 { color: red; }
 
     assert "index.html" in files
     assert "style.css" in files
+
+
+def test_coder_with_rag_context_injection():
+    """Test CoderService retrieves and embeds relevant RAG patterns into model prompts."""
+    mock_provider = MagicMock()
+    mock_provider.generate_text.return_value = """
+```index.html
+<!DOCTYPE html><html><body><canvas id="c"></canvas></body></html>
+```
+"""
+    mock_kb = MagicMock()
+    mock_search_result = MagicMock()
+    mock_search_result.content = "class GameLoop { start() { requestAnimationFrame(); } }"
+    mock_search_result.metadata = {"section_title": "Canvas Game Loop"}
+    mock_kb.query_patterns.return_value = [mock_search_result]
+
+    coder = CoderService(provider=mock_provider, knowledge_base=mock_kb)
+    plan = Plan(
+        title="Snake Game",
+        summary="Retro canvas arcade game",
+        target_files=["index.html"],
+        steps=[PlanStep(step_number=1, title="Canvas setup", description="Set up game loop", target_files=["index.html"])],
+    )
+
+    files = coder.generate_files_from_plan(plan=plan, prompt="Build snake game")
+
+    assert "index.html" in files
+    mock_kb.query_patterns.assert_called_once()
+    # Verify RAG context was included in the user prompt sent to LLM
+    call_args = mock_provider.generate_text.call_args
+    assert "RAG Context" in call_args.kwargs["user_prompt"]
+    assert "Canvas Game Loop" in call_args.kwargs["user_prompt"]
+    assert "requestAnimationFrame" in call_args.kwargs["user_prompt"]
+

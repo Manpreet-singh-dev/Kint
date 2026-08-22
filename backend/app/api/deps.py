@@ -14,6 +14,11 @@ from app.services.sandbox import SandboxService
 from app.services.providers import LLMProvider, get_llm_provider
 
 
+from app.services.embedding import EmbeddingService
+from app.services.knowledge_base import KnowledgeBaseService
+from app.services.vector_store import VectorStoreService
+
+
 def get_app_settings() -> Settings:
     """Provide application settings instance."""
     return get_settings()
@@ -24,14 +29,35 @@ def get_provider(settings: Settings = Depends(get_app_settings)) -> LLMProvider:
     return get_llm_provider(settings)
 
 
+def get_vector_store_service() -> VectorStoreService:
+    """Provide VectorStoreService singleton instance."""
+    return VectorStoreService()
+
+
+def get_embedding_service() -> EmbeddingService:
+    """Provide EmbeddingService instance."""
+    return EmbeddingService()
+
+
+def get_knowledge_base_service(
+    vector_store: VectorStoreService = Depends(get_vector_store_service),
+    embedding: EmbeddingService = Depends(get_embedding_service),
+) -> KnowledgeBaseService:
+    """Provide KnowledgeBaseService instance with vector store."""
+    return KnowledgeBaseService(vector_store=vector_store, embedding_service=embedding)
+
+
 def get_planner_service(provider: LLMProvider = Depends(get_provider)) -> PlannerService:
     """Provide PlannerService instance with injected LLM provider."""
     return PlannerService(provider=provider)
 
 
-def get_coder_service(provider: LLMProvider = Depends(get_provider)) -> CoderService:
-    """Provide CoderService instance with injected LLM provider."""
-    return CoderService(provider=provider)
+def get_coder_service(
+    provider: LLMProvider = Depends(get_provider),
+    knowledge_base: KnowledgeBaseService = Depends(get_knowledge_base_service),
+) -> CoderService:
+    """Provide CoderService instance with injected LLM provider and RAG knowledge base."""
+    return CoderService(provider=provider, knowledge_base=knowledge_base)
 
 
 def get_debugger_service(provider: LLMProvider = Depends(get_provider)) -> DebuggerService:

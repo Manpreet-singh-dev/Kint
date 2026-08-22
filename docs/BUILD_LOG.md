@@ -757,3 +757,24 @@ GEMINI_API_KEY=your_key_here
 - 50/50 backend pytest tests passed in 10.88s.
 
 **Next:** Retrieve top-k relevant chunks before each Coder agent call, inject into its context.
+
+---
+
+### Phase 3 — RAG Context Injection into Coder Agent - 2026-08-22
+
+**What:** Integrated semantic vector retrieval into the Coder Agent (`CoderService`), querying top-$k$ architectural and framework patterns from `KnowledgeBaseService` and injecting them into the generation prompt.
+
+**Key Implementation Details:**
+- **RAG Context Retrieval** (`app/services/coder.py`):
+  - Added `_retrieve_rag_context(query, limit=2)`: Performs semantic cosine search in pgvector collection `framework_patterns`.
+  - Formats pattern titles, guidelines, and code snippets into a structured `RAG Context` section.
+  - Injects relevant RAG context into `generate_files_from_plan`, `execute_step`, `apply_fix`, and legacy `generate_files`.
+- **Dependency Injection** (`app/api/deps.py`):
+  - Wired `KnowledgeBaseService` and `VectorStoreService` into `get_coder_service`.
+- **Unit & Integration Tests** (`tests/api/test_coder.py`):
+  - Added `test_coder_with_rag_context_injection` validating that pattern queries trigger and are properly embedded in LLM prompt calls.
+
+**Validation:**
+- 51/51 backend pytest tests passed in 18.69s.
+
+**Next:** Embed the files of a freshly generated app after each successful build.
