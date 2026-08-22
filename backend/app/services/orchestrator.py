@@ -23,6 +23,7 @@ from typing import Dict, List, Optional
 from app.schemas.debugger import DebugDiagnosis
 from app.schemas.plan import Plan
 from app.schemas.sandbox import SandboxResult
+from app.services.app_indexer import AppIndexerService
 from app.services.coder import CoderService
 from app.services.debugger import DebuggerService
 from app.services.planner import PlannerService
@@ -53,6 +54,7 @@ class AgentExecutionContext:
     stderr: str = ""
     preview_url: Optional[str] = None
     sandbox_id: Optional[str] = None
+    app_id: Optional[str] = None
     debug_history: List[DebugDiagnosis] = field(default_factory=list)
     message: str = ""
     error_message: Optional[str] = None
@@ -68,12 +70,14 @@ class OrchestratorService:
         coder: CoderService,
         sandbox: SandboxService,
         debugger: DebuggerService,
+        app_indexer: Optional[AppIndexerService] = None,
         max_retries: int = 2,
     ):
         self.planner = planner
         self.coder = coder
         self.sandbox = sandbox
         self.debugger = debugger
+        self.app_indexer = app_indexer
         self.max_retries = max_retries
 
     async def run_pipeline(self, prompt: str) -> AgentExecutionContext:
@@ -143,6 +147,18 @@ class OrchestratorService:
             if sandbox_result.preview_url or (not has_runtime_error and not has_sandbox_failure):
                 context.current_state = AgentState.DONE
                 file_count = len(context.files)
+
+                # Index generated codebase into pgvector for RAG / Chat Grounding
+                if self.app_indexer and context.files:
+                    try:
+                        context.app_id = self.app_indexer.index_generated_app(
+                            files=context.files,
+                            prompt=context.prompt,
+                            app_id=context.sandbox_id,
+                        )
+                    except Exception:
+                        pass
+
                 if context.retry_count > 0:
                     context.message = (
                         f"Generated {file_count} file(s) and resolved runtime bugs after "

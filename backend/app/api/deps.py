@@ -47,6 +47,17 @@ def get_knowledge_base_service(
     return KnowledgeBaseService(vector_store=vector_store, embedding_service=embedding)
 
 
+from app.services.app_indexer import AppIndexerService
+
+
+def get_app_indexer_service(
+    vector_store: VectorStoreService = Depends(get_vector_store_service),
+    embedding: EmbeddingService = Depends(get_embedding_service),
+) -> AppIndexerService:
+    """Provide AppIndexerService instance."""
+    return AppIndexerService(vector_store=vector_store, embedding_service=embedding)
+
+
 def get_planner_service(provider: LLMProvider = Depends(get_provider)) -> PlannerService:
     """Provide PlannerService instance with injected LLM provider."""
     return PlannerService(provider=provider)
@@ -75,6 +86,7 @@ def get_orchestrator_service(
     coder: CoderService = Depends(get_coder_service),
     sandbox: SandboxService = Depends(get_sandbox_service),
     debugger: DebuggerService = Depends(get_debugger_service),
+    app_indexer: AppIndexerService = Depends(get_app_indexer_service),
 ) -> OrchestratorService:
     """Provide OrchestratorService instance managing the multi-agent pipeline."""
     return OrchestratorService(
@@ -82,5 +94,6 @@ def get_orchestrator_service(
         coder=coder,
         sandbox=sandbox,
         debugger=debugger,
+        app_indexer=app_indexer,
         max_retries=2,
     )

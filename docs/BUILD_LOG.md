@@ -778,3 +778,30 @@ GEMINI_API_KEY=your_key_here
 - 51/51 backend pytest tests passed in 18.69s.
 
 **Next:** Embed the files of a freshly generated app after each successful build.
+
+---
+
+### Phase 3 — Embed Freshly Generated Application Codebase - 2026-08-22
+
+**What:** Implemented the `AppIndexerService` to automatically chunk, embed, and persist source code files (`index.html`, `style.css`, `script.js`) into PostgreSQL + `pgvector` upon every successful build completion.
+
+**Key Implementation Details:**
+- **App Indexer Service** (`app/services/app_indexer.py`):
+  - `index_generated_app(files, prompt, app_id)`: Chunks application codebases into structured semantic blocks:
+    - **HTML**: Segmented along semantic tags (`<head>`, `<main>`, `<section>`, `<script>`).
+    - **JavaScript**: Segmented by function, class, and method declaration boundaries.
+    - **CSS**: Segmented into 3-5 rule clusters.
+  - Ingests chunks with metadata (`app_id`, `file_name`, `file_type`, `prompt`, `chunk_type`) into the `app_code` vector collection via `EmbeddingService`.
+  - `query_app_code(app_id, query, limit)`: Performs app-scoped semantic similarity search over code chunks.
+- **Orchestrator Integration** (`app/services/orchestrator.py`):
+  - Injected `AppIndexerService` into `OrchestratorService`.
+  - When the build state transitions to `DONE`, automatically calls `app_indexer.index_generated_app`, assigning and tracking `context.app_id`.
+- **Dependency Injection** (`app/api/deps.py`):
+  - Added `get_app_indexer_service` dependency provider.
+- **Unit & Integration Tests** (`tests/services/test_app_indexer.py`):
+  - 3 tests validating HTML structural splitting, JS function boundary splitting, multi-app indexing isolation, and scoped semantic queries.
+
+**Validation:**
+- 54/54 backend pytest tests passed in 13.73s.
+
+**Next:** Add a "chat about this app" endpoint that answers questions grounded in those embeddings.
