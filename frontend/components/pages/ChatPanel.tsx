@@ -12,6 +12,7 @@ export interface ChatPanelProps {
   isLoading: boolean;
   onSend: (prompt: string) => void;
   agentTrail?: AgentTrailState;
+  onClearChat?: () => void;
 }
 
 export function ChatPanel({
@@ -19,6 +20,7 @@ export function ChatPanel({
   isLoading,
   onSend,
   agentTrail,
+  onClearChat,
 }: ChatPanelProps) {
   const [inputVal, setInputVal] = useState("");
 
@@ -28,7 +30,7 @@ export function ChatPanel({
 
   return (
     <div className="flex w-full h-full flex-col bg-zinc-900 overflow-hidden">
-      <Header />
+      <Header onClearChat={onClearChat} hasMessages={messages.length > 0} />
       <div className="px-3 pt-3">
         <AgentStatusTrail trail={agentTrail} />
       </div>

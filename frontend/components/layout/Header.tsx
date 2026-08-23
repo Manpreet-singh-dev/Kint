@@ -4,11 +4,15 @@ import { APP_NAME, APP_TAGLINE } from "@/lib/constants";
 export interface HeaderProps {
   title?: string;
   subtitle?: string;
+  onClearChat?: () => void;
+  hasMessages?: boolean;
 }
 
 export function Header({
   title = APP_NAME,
   subtitle = APP_TAGLINE,
+  onClearChat,
+  hasMessages = false,
 }: HeaderProps) {
   return (
     <header className="border-b border-zinc-800/80 px-4 py-3 bg-zinc-900/90 backdrop-blur-sm shrink-0 flex items-center justify-between">
@@ -30,6 +34,29 @@ export function Header({
           </p>
         </div>
       </div>
+
+      {onClearChat && hasMessages && (
+        <button
+          onClick={onClearChat}
+          title="Start New Chat & Clear History"
+          className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
+        >
+          <svg
+            className="w-3.5 h-3.5 text-zinc-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          <span>New Chat</span>
+        </button>
+      )}
     </header>
   );
 }

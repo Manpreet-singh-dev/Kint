@@ -1,0 +1,102 @@
+{
+  "static_cached_tokens": 1502,
+  "turns_evaluated": 5,
+  "without_caching": {
+    "total_cost_usd": 0.05148,
+    "total_latency_sec": 13.2,
+    "avg_latency_per_turn_sec": 2.64,
+    "turn_details": [
+      {
+        "turn": 1,
+        "input_tokens": 1562,
+        "cache_read_tokens": 0,
+        "output_tokens": 350,
+        "cost_usd": 0.009936,
+        "latency_sec": 2.48
+      },
+      {
+        "turn": 2,
+        "input_tokens": 1622,
+        "cache_read_tokens": 0,
+        "output_tokens": 350,
+        "cost_usd": 0.010116,
+        "latency_sec": 2.56
+      },
+      {
+        "turn": 3,
+        "input_tokens": 1682,
+        "cache_read_tokens": 0,
+        "output_tokens": 350,
+        "cost_usd": 0.010296,
+        "latency_sec": 2.64
+      },
+      {
+        "turn": 4,
+        "input_tokens": 1742,
+        "cache_read_tokens": 0,
+        "output_tokens": 350,
+        "cost_usd": 0.010476,
+        "latency_sec": 2.72
+      },
+      {
+        "turn": 5,
+        "input_tokens": 1802,
+        "cache_read_tokens": 0,
+        "output_tokens": 350,
+        "cost_usd": 0.010656,
+        "latency_sec": 2.8
+      }
+    ]
+  },
+  "with_caching": {
+    "total_cost_usd": 0.036385,
+    "total_latency_sec": 6.11,
+    "avg_latency_per_turn_sec": 1.22,
+    "turn_details": [
+      {
+        "turn": 1,
+        "input_tokens": 60,
+        "cache_read_tokens": 0,
+        "output_tokens": 350,
+        "cost_usd": 0.011062,
+        "latency_sec": 2.55
+      },
+      {
+        "turn": 2,
+        "input_tokens": 120,
+        "cache_read_tokens": 1502,
+        "output_tokens": 350,
+        "cost_usd": 0.006061,
+        "latency_sec": 0.83
+      },
+      {
+        "turn": 3,
+        "input_tokens": 180,
+        "cache_read_tokens": 1502,
+        "output_tokens": 350,
+        "cost_usd": 0.006241,
+        "latency_sec": 0.87
+      },
+      {
+        "turn": 4,
+        "input_tokens": 240,
+        "cache_read_tokens": 1502,
+        "output_tokens": 350,
+        "cost_usd": 0.006421,
+        "latency_sec": 0.91
+      },
+      {
+        "turn": 5,
+        "input_tokens": 300,
+        "cache_read_tokens": 1502,
+        "output_tokens": 350,
+        "cost_usd": 0.006601,
+        "latency_sec": 0.95
+      }
+    ]
+  },
+  "improvements": {
+    "cost_savings_percentage": 29.3,
+    "latency_reduction_percentage": 53.7
+  }
+}

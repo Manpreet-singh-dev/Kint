@@ -237,13 +237,20 @@ class CoderService:
                 raise
             raise CodeGenerationError(f"Failed to apply debug fix: {str(e)}")
 
-    def generate_files_from_plan(self, plan: Plan, prompt: str) -> Dict[str, str]:
+    def generate_files_from_plan(
+        self,
+        plan: Plan,
+        prompt: str,
+        current_files: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, str]:
         """
-        Generate complete, cohesive application files grounded in the structured Plan and RAG context.
+        Generate complete, cohesive application files grounded in the structured Plan,
+        RAG context, and any existing codebase files for recursive improvements.
 
         Args:
             plan: The structured Plan formulated by the Planner agent.
-            prompt: The original user prompt.
+            prompt: The original user prompt or follow-up modification request.
+            current_files: Existing application files to modify and improve upon.
 
         Returns:
             Dictionary mapping filenames to full source code.
@@ -260,13 +267,26 @@ class CoderService:
         rag_context = self._retrieve_rag_context(f"{prompt} {plan.title} {plan.summary}", limit=2)
         rag_section = f"\nRelevant Architecture & Framework Patterns (RAG Context):\n{rag_context}\n" if rag_context else ""
 
-        plan_prompt = PLAN_GENERATION_PROMPT_TEMPLATE.format(
-            prompt=prompt,
-            plan_title=plan.title,
-            plan_summary=plan.summary,
-            target_files=", ".join(plan.target_files),
-            steps_summary=steps_summary,
-            rag_section=rag_section,
+        existing_section = ""
+        if current_files:
+            existing_section = (
+                "\nExisting Application Codebase (You must improve/modify this code while preserving prior features):\n"
+                f"{self._format_files_for_prompt(current_files)}\n\n"
+            )
+
+        plan_prompt = (
+            f"{existing_section}"
+            f"Improvement Request: {prompt}\n\n"
+            f"Architectural Plan: {plan.title}\n"
+            f"Summary: {plan.summary}\n"
+            f"Target Files: {', '.join(plan.target_files)}\n\n"
+            f"Implementation Steps:\n{steps_summary}\n"
+            f"{rag_section}\n"
+            f"Instructions:\n"
+            f"1. Generate the complete source code for all target files.\n"
+            f"2. Wrap each file in a code block with its exact filename (e.g. ```index.html, ```style.css, ```script.js).\n"
+            f"3. Do NOT use placeholder comments (e.g. '// ... rest of code'). Return full, working code.\n"
+            f"4. Seamlessly incorporate the requested improvements onto the existing application."
         )
 
         try:
@@ -279,6 +299,12 @@ class CoderService:
                 response=response_text,
                 expected_target_files=plan.target_files,
             )
+
+            # If modifying existing files, merge onto baseline codebase
+            if current_files:
+                merged_files = dict(current_files)
+                merged_files.update(files)
+                files = merged_files
 
             if not files:
                 raise CodeGenerationError(

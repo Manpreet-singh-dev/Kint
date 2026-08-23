@@ -830,3 +830,58 @@ GEMINI_API_KEY=your_key_here
 - 57/57 backend pytest tests passed in 14.08s.
 
 **Next:** Enable prompt caching on the static system prompt and retrieved doc context in Claude API calls.
+
+---
+
+### Phase 3 — Anthropic Prompt Caching & Latency/Cost Benchmark - 2026-08-22
+
+**What:** Implemented prompt caching on static system prompts and retrieved RAG context in `ClaudeProvider` via ephemeral cache controls, and benchmarked token cost & latency across multi-turn conversations (`backend/benchmark_caching.py`).
+
+**Key Implementation Details:**
+- **Prompt Caching Support** (`app/services/providers/claude.py`):
+  - Injects `cache_control: {"type": "ephemeral"}` on static system prompt blocks ($>100$ tokens) and retrieved RAG documentation blocks.
+  - Automatically records `cache_creation_input_tokens`, `cache_read_input_tokens`, and standard input/output tokens in `last_usage`.
+- **Unit Tests** (`tests/api/test_claude_caching.py`):
+  - 2 tests validating ephemeral cache block formatting and cache metric extraction.
+- **Benchmark Evaluation** (`backend/benchmark_caching.py`):
+  - Evaluated a 5-turn multi-step build session with a ~1,500-token static cached prefix (System Prompt + RAG documentation).
+
+**Benchmark Results:**
+
+| Metric | Without Caching (Baseline) | With Prompt Caching (Optimized) | Delta / Savings |
+|---|---|---|---|
+| **Total Session Cost** | $0.05148 | **$0.03638** | **-29.3% total cost reduction** (90% discount on cached prefix reads) |
+| **Total Latency** | 13.20s | **6.11s** | **53.7% latency reduction** |
+| **Average Latency / Turn** | 2.64s / turn | **1.22s / turn** | **Sub-second TTFT on cache hits** |
+
+**Validation:**
+- All 7 tasks of Phase 3 marked as 100% complete in `docs/TASKS.md`.
+- 59/59 backend pytest tests passing in 16.70s.
+- Detailed metrics saved to `docs/caching_benchmark_results.json`.
+
+**Next:** Phase 4 — GraphRAG (Week 4: Stand up Neo4j local / hosted free tier).
+
+---
+
+### Feature Enhancement — Recursive / Iterative Application Improvement & State Persistence - 2026-08-23
+
+**What:** Enabled recursive incremental improvements on generated applications across chat turns so follow-up prompts (e.g. *"add dark mode"*, *"change button color"*, *"add sound alerts"*) modify and extend the existing codebase rather than regenerating from scratch. Also added full `localStorage` persistence for chat messages, active codebase files, and preview URLs with a "New Chat" reset option.
+
+**Key Implementation Details:**
+- **Schema & Endpoint** (`app/schemas/generate.py` & `app/api/routes/generate.py`):
+  - Updated `GenerateRequest` to accept `current_files: Optional[Dict[str, str]]`.
+- **Incremental Planning & Coding** (`app/services/planner.py` & `app/services/coder.py`):
+  - `PlannerService`: Formulates modification plans that explicitly preserve existing components when `current_files` are present.
+  - `CoderService`: Formats existing codebase into the model prompt, applies additions/modifications, and merges output onto the baseline codebase.
+- **Orchestrator Lifecycle** (`app/services/orchestrator.py`):
+  - Passes `prior_files` through the pipeline, deploying merged files to sandbox.
+- **Frontend State & Persistence** (`frontend/hooks/useAppGeneration.ts`, `frontend/hooks/usePreview.ts`, `frontend/components/layout/Header.tsx`):
+  - Stores `currentFiles` and `messages` in `localStorage` across page refreshes.
+  - Passes `currentFiles` in all subsequent `generateApp` API calls.
+  - Added "New Chat" button to header to cleanly reset sessions.
+
+**Validation:**
+- 60/60 backend pytest tests passed in 51.57s.
+- `test_generate_recursive_modification_with_current_files` validated end-to-end.
+
+**Next:** Phase 4 — GraphRAG (Week 4: Stand up Neo4j local / hosted free tier).

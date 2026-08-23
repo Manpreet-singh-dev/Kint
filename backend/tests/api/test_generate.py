@@ -42,7 +42,49 @@ def test_generate_full_pipeline_success(client: TestClient):
         assert data["preview_url"] == "https://3000-test-sandbox.e2b.dev"
         assert "deployed to sandbox" in data["message"]
 
-        mock_orchestrator.run_pipeline.assert_called_once_with("Create a modern timer app")
+        mock_orchestrator.run_pipeline.assert_called_once_with(
+            prompt="Create a modern timer app",
+            prior_files=None,
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_generate_recursive_modification_with_current_files(client: TestClient):
+    """Test recursive generation passes existing current_files to orchestrator pipeline."""
+    mock_orchestrator = MagicMock()
+    mock_orchestrator.run_pipeline = AsyncMock(
+        return_value=AgentExecutionContext(
+            prompt="Add dark mode toggle",
+            current_state=AgentState.DONE,
+            files={
+                "index.html": "<!DOCTYPE html><html><body><h1>Timer</h1><button id='theme'>Dark</button></body></html>",
+                "style.css": ".dark { background: #111; }",
+            },
+            preview_url="https://3000-test-sandbox.e2b.dev",
+            message="Updated 2 file(s) and merged changes.",
+        )
+    )
+    _override_orchestrator(mock_orchestrator)
+
+    try:
+        payload = {
+            "prompt": "Add dark mode toggle",
+            "current_files": {
+                "index.html": "<!DOCTYPE html><html><body><h1>Timer</h1></body></html>"
+            },
+        }
+        response = client.post("/generate", json=payload)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "style.css" in data["files"]
+        assert "theme" in data["files"]["index.html"]
+
+        mock_orchestrator.run_pipeline.assert_called_once_with(
+            prompt="Add dark mode toggle",
+            prior_files={"index.html": "<!DOCTYPE html><html><body><h1>Timer</h1></body></html>"},
+        )
     finally:
         app.dependency_overrides.clear()
 

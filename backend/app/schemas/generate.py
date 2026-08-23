@@ -3,13 +3,17 @@ from pydantic import BaseModel, Field
 
 
 class GenerateRequest(BaseModel):
-    """Request schema for code generation endpoint."""
+    """Request schema for code generation endpoint with recursive modification support."""
 
     prompt: str = Field(
         ...,
         min_length=1,
-        description="Natural language description of the web application to generate",
-        examples=["Build a modern stopwatch app with lap times and dark mode"],
+        description="Natural language description of the web application to generate or modify",
+        examples=["Build a modern stopwatch app with lap times and dark mode", "Now add sound alerts and a lap counter"],
+    )
+    current_files: Optional[Dict[str, str]] = Field(
+        default=None,
+        description="Existing codebase files to recursively modify and improve upon",
     )
 
 

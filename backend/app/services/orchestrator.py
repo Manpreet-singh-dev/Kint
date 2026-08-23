@@ -80,12 +80,18 @@ class OrchestratorService:
         self.app_indexer = app_indexer
         self.max_retries = max_retries
 
-    async def run_pipeline(self, prompt: str) -> AgentExecutionContext:
+    async def run_pipeline(
+        self,
+        prompt: str,
+        prior_files: Optional[Dict[str, str]] = None,
+    ) -> AgentExecutionContext:
         """
-        Execute the full multi-agent orchestration loop for a user prompt.
+        Execute the full multi-agent orchestration loop for a user prompt, supporting
+        recursive iterative improvements on existing codebases.
 
         Args:
-            prompt: User's natural language application prompt.
+            prompt: User's natural language application prompt or modification request.
+            prior_files: Existing codebase files to modify/extend (if follow-up request).
 
         Returns:
             AgentExecutionContext containing generated files, preview URL, retry counts, and status.
@@ -93,6 +99,7 @@ class OrchestratorService:
         start_time = time.time()
         context = AgentExecutionContext(
             prompt=prompt.strip(),
+            files=dict(prior_files) if prior_files else {},
             max_retries=self.max_retries,
         )
 
@@ -101,7 +108,10 @@ class OrchestratorService:
         # -------------------------------------------------------------
         context.current_state = AgentState.PLANNING
         try:
-            context.plan = self.planner.create_plan(context.prompt)
+            context.plan = self.planner.create_plan(
+                prompt=context.prompt,
+                current_files=prior_files,
+            )
         except Exception as e:
             # Fallback to direct coding if planning fails
             context.error_message = f"Planning notice: {str(e)}"
@@ -114,6 +124,7 @@ class OrchestratorService:
             context.files = self.coder.generate_files_from_plan(
                 plan=context.plan,
                 prompt=context.prompt,
+                current_files=prior_files,
             )
         else:
             # Direct generation fallback

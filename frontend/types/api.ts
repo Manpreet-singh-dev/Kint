@@ -2,6 +2,7 @@ import { GeneratedFiles } from "./message";
 
 export interface GenerateRequest {
   prompt: string;
+  current_files?: GeneratedFiles;
 }
 
 export interface GenerateResponse {

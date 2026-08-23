@@ -1,12 +1,18 @@
 import { apiClient } from "./apiClient";
 import { API_ENDPOINTS } from "@/lib/config";
-import { GenerateRequest, GenerateResponse, HealthResponse } from "@/types";
+import { GeneratedFiles, GenerateRequest, GenerateResponse, HealthResponse } from "@/types";
 
 /**
- * Send prompt to FastAPI backend for code generation.
+ * Send prompt to FastAPI backend for code generation or recursive modification.
  */
-export async function generateApp(prompt: string): Promise<GenerateResponse> {
-  const payload: GenerateRequest = { prompt: prompt.trim() };
+export async function generateApp(
+  prompt: string,
+  currentFiles?: GeneratedFiles
+): Promise<GenerateResponse> {
+  const payload: GenerateRequest = {
+    prompt: prompt.trim(),
+    current_files: currentFiles,
+  };
 
   return apiClient<GenerateResponse>(API_ENDPOINTS.GENERATE, {
     method: "POST",

@@ -63,12 +63,18 @@ class PlannerService:
     def __init__(self, provider: LLMProvider):
         self.provider = provider
 
-    def create_plan(self, prompt: str) -> Plan:
+    def create_plan(
+        self,
+        prompt: str,
+        current_files: Optional[dict[str, str]] = None,
+    ) -> Plan:
         """
-        Formulate an ordered implementation plan from a user prompt.
+        Formulate an ordered implementation plan from a user prompt, taking into account
+        any existing codebase files for incremental modification.
 
         Args:
-            prompt: User's natural language description of the app.
+            prompt: User's natural language description or modification request.
+            current_files: Existing codebase files if modifying an existing app.
 
         Returns:
             Plan object containing summary, target files, and ordered build steps.
@@ -79,10 +85,20 @@ class PlannerService:
         if not prompt or not prompt.strip():
             raise CodeGenerationError("Prompt cannot be empty for planning.")
 
+        if current_files:
+            file_manifest = ", ".join(current_files.keys())
+            user_prompt = (
+                f"The user wants to enhance and modify an existing web application with current files: [{file_manifest}].\n\n"
+                f"Modification / Improvement Request: {prompt.strip()}\n\n"
+                f"Create an incremental modification plan detailing what to add or update in the existing files without breaking current features."
+            )
+        else:
+            user_prompt = f"Create an implementation plan for the following web application: {prompt.strip()}"
+
         try:
             response_text = self.provider.generate_text(
                 system_prompt=PLANNER_SYSTEM_PROMPT,
-                user_prompt=f"Create an implementation plan for the following web application: {prompt.strip()}",
+                user_prompt=user_prompt,
             )
 
             plan = self._parse_plan_from_response(response_text, fallback_title=prompt.strip())

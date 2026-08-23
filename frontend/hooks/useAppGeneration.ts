@@ -1,27 +1,98 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Message, AgentTrailState } from "@/types";
+import { useState, useCallback, useEffect } from "react";
+import { Message, AgentTrailState, GeneratedFiles } from "@/types";
 import { generateApp } from "@/api/generateService";
 import { formatGeneratedFiles, getErrorMessage } from "@/utils";
 import { DEFAULT_AGENT_TRAIL } from "@/components/common";
 import { usePreview } from "./usePreview";
 
+const STORAGE_KEY_MESSAGES = "kint_chat_messages";
+const STORAGE_KEY_FILES = "kint_current_files";
+
 /**
- * Master hook for managing chat messages, multi-agent status trail, and live preview.
+ * Master hook for managing chat messages, multi-agent status trail, codebase state, and live preview
+ * with recursive incremental improvement and persistent localStorage storage.
  */
 export function useAppGeneration() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [currentFiles, setCurrentFiles] = useState<GeneratedFiles | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [agentTrail, setAgentTrail] =
-    useState<AgentTrailState>(DEFAULT_AGENT_TRAIL);
+  const [agentTrail, setAgentTrail] = useState<AgentTrailState>(DEFAULT_AGENT_TRAIL);
   const { previewUrl, setPreviewUrl, refreshPreview } = usePreview();
+
+  // Load chat messages and existing files from localStorage on client mount
+  useEffect(() => {
+    try {
+      const savedMessages = window.localStorage.getItem(STORAGE_KEY_MESSAGES);
+      if (savedMessages) {
+        const parsed = JSON.parse(savedMessages);
+        if (Array.isArray(parsed)) {
+          const restored: Message[] = parsed.map((m: any) => ({
+            ...m,
+            timestamp: m.timestamp ? new Date(m.timestamp) : new Date(),
+          }));
+          setMessages(restored);
+        }
+      }
+
+      const savedFiles = window.localStorage.getItem(STORAGE_KEY_FILES);
+      if (savedFiles) {
+        setCurrentFiles(JSON.parse(savedFiles));
+      }
+    } catch (e) {
+      console.error("Failed to load state from localStorage", e);
+    } finally {
+      setIsLoaded(true);
+    }
+  }, []);
+
+  // Sync messages to localStorage whenever they change
+  useEffect(() => {
+    if (!isLoaded) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messages));
+    } catch (e) {
+      console.error("Failed to save chat history to localStorage", e);
+    }
+  }, [messages, isLoaded]);
+
+  // Sync currentFiles to localStorage
+  useEffect(() => {
+    if (!isLoaded) return;
+    try {
+      if (currentFiles) {
+        window.localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(currentFiles));
+      } else {
+        window.localStorage.removeItem(STORAGE_KEY_FILES);
+      }
+    } catch (e) {
+      console.error("Failed to save files to localStorage", e);
+    }
+  }, [currentFiles, isLoaded]);
+
+  // Clear chat history, current files, and reset app state
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    setCurrentFiles(null);
+    setPreviewUrl(null);
+    setAgentTrail(DEFAULT_AGENT_TRAIL);
+    try {
+      window.localStorage.removeItem(STORAGE_KEY_MESSAGES);
+      window.localStorage.removeItem(STORAGE_KEY_FILES);
+      window.localStorage.removeItem("kint_preview_url");
+    } catch (e) {
+      console.error("Failed to clear localStorage", e);
+    }
+  }, [setPreviewUrl]);
 
   const handleGenerate = useCallback(
     async (prompt: string) => {
       const trimmedPrompt = prompt.trim();
       if (!trimmedPrompt || isLoading) return;
 
+      const isIncremental = Boolean(currentFiles && Object.keys(currentFiles).length > 0);
       const startTime = Date.now();
 
       // Append user message
@@ -39,7 +110,9 @@ export function useAppGeneration() {
         planner: {
           type: "planner",
           label: "Planner",
-          description: "Analyzing prompt & architecture plan...",
+          description: isIncremental
+            ? "Planning incremental code modifications on existing codebase..."
+            : "Analyzing prompt & architecture plan...",
           state: "active",
         },
         coder: {
@@ -62,37 +135,38 @@ export function useAppGeneration() {
         },
       });
 
-      // Transition Planner -> Coder after brief planning phase
+      // Transition Planner -> Coder
       const plannerTimer = setTimeout(() => {
-        const planDuration = Number(
-          ((Date.now() - startTime) / 1000).toFixed(1)
-        );
+        const planDuration = Number(((Date.now() - startTime) / 1000).toFixed(1));
         setAgentTrail((prev) => ({
           ...prev,
           planner: {
             ...prev.planner,
             state: "done",
-            description: "Single-agent plan formulated",
+            description: isIncremental ? "Modification plan formulated" : "Multi-step plan formulated",
             durationSec: planDuration,
           },
           coder: {
             ...prev.coder,
             state: "active",
-            description: "Generating HTML, CSS, and JS files...",
+            description: isIncremental
+              ? "Applying code modifications & merging with existing files..."
+              : "Generating HTML, CSS, and JS files with RAG context...",
           },
         }));
       }, 500);
 
       try {
-        const response = await generateApp(trimmedPrompt);
+        const response = await generateApp(trimmedPrompt, currentFiles || undefined);
         clearTimeout(plannerTimer);
 
-        const totalGenDuration = Number(
-          ((Date.now() - startTime) / 1000).toFixed(1)
-        );
-        const fileCount = response.files
-          ? Object.keys(response.files).length
-          : 0;
+        const totalGenDuration = Number(((Date.now() - startTime) / 1000).toFixed(1));
+        const fileCount = response.files ? Object.keys(response.files).length : 0;
+
+        // Store updated codebase files
+        if (response.files && fileCount > 0) {
+          setCurrentFiles(response.files);
+        }
 
         // Build assistant response with files summary
         let assistantContent = response.message;
@@ -111,19 +185,20 @@ export function useAppGeneration() {
         if (response.preview_url) {
           setPreviewUrl(response.preview_url);
 
-          // Update Agent Trail to Done
           setAgentTrail({
             planner: {
               type: "planner",
               label: "Planner",
-              description: "App architecture formulated",
+              description: isIncremental ? "Modification plan formulated" : "App architecture formulated",
               state: "done",
               durationSec: 0.5,
             },
             coder: {
               type: "coder",
               label: "Coder",
-              description: `Generated ${fileCount} file(s) successfully`,
+              description: isIncremental
+                ? `Updated and merged ${fileCount} file(s)`
+                : `Generated ${fileCount} file(s) with RAG context`,
               state: "done",
               durationSec: Math.max(0.5, totalGenDuration - 3.0),
             },
@@ -142,12 +217,11 @@ export function useAppGeneration() {
             },
           });
         } else {
-          // If no preview URL returned
           setAgentTrail({
             planner: {
               type: "planner",
               label: "Planner",
-              description: "App architecture formulated",
+              description: isIncremental ? "Modification plan formulated" : "App architecture formulated",
               state: "done",
               durationSec: 0.5,
             },
@@ -183,7 +257,6 @@ export function useAppGeneration() {
         };
         setMessages((prev) => [...prev, errorMessage]);
 
-        // Mark active agent step as error
         setAgentTrail((prev) => ({
           ...prev,
           coder: {
@@ -204,15 +277,17 @@ export function useAppGeneration() {
         setIsLoading(false);
       }
     },
-    [isLoading, setPreviewUrl]
+    [isLoading, currentFiles, setPreviewUrl]
   );
 
   return {
     messages,
+    currentFiles,
     isLoading,
     previewUrl,
     agentTrail,
     handleGenerate,
     refreshPreview,
+    clearChat,
   };
 }

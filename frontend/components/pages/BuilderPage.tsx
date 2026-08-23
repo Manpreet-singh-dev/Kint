@@ -14,6 +14,7 @@ export function BuilderPage() {
     agentTrail,
     handleGenerate,
     refreshPreview,
+    clearChat,
   } = useAppGeneration();
 
   return (
@@ -25,6 +26,7 @@ export function BuilderPage() {
           isLoading={isLoading}
           onSend={handleGenerate}
           agentTrail={agentTrail}
+          onClearChat={clearChat}
         />
       }
       rightPanel={

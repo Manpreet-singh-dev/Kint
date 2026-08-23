@@ -54,7 +54,10 @@ async def generate_application(
 
     Pipeline: User Prompt → Planner Agent → Coder Agent → E2B Sandbox → (Debugger retry loop) → Live Preview.
     """
-    context = await orchestrator_service.run_pipeline(request.prompt)
+    context = await orchestrator_service.run_pipeline(
+        prompt=request.prompt,
+        prior_files=request.current_files,
+    )
 
     if context.current_state == AgentState.FAILED and not context.files:
         raise CodeGenerationError(
