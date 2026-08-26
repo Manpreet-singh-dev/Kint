@@ -65,6 +65,12 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "kint_db"
     DATABASE_URL: str | None = None
 
+    # Neo4j settings
+    NEO4J_URI: str = "bolt://localhost:7687"
+    NEO4J_USER: str = "neo4j"
+    NEO4J_PASSWORD: str = "neo4jpassword"
+    NEO4J_DATABASE: str = "neo4j"
+
     # Embedding model configuration
     EMBEDDING_DIMENSION: int = 1536
     EMBEDDING_MODEL: str = "text-embedding-3-small"

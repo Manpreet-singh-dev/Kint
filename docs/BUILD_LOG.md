@@ -885,3 +885,31 @@ GEMINI_API_KEY=your_key_here
 - `test_generate_recursive_modification_with_current_files` validated end-to-end.
 
 **Next:** Phase 4 — GraphRAG (Week 4: Stand up Neo4j local / hosted free tier).
+
+---
+
+### Phase 4 (Task 1) — Stand up Neo4j Graph Database - 2026-08-25
+
+**What:** Integrated and stood up Neo4j Community Edition 5.26 as the graph database backend for GraphRAG code relationships and AST traversal.
+
+**Key Implementation Details:**
+- **Docker Compose Configuration** (`docker-compose.yml`):
+  - Added `neo4j` service (`neo4j:5.26-community`) with APOC plugin enabled.
+  - Exposed HTTP Browser UI on port `7474` and Bolt binary protocol on port `7687`.
+  - Configured persistent volume `kint_neo4jdata` and container health check.
+- **Backend Configuration & Driver** (`backend/pyproject.toml`, `app/core/config.py`, `app/db/neo4j.py`):
+  - Installed official `neo4j` Python driver (`v6.2.0`).
+  - Added `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE` to `Settings` with env var overrides.
+  - Created `app/db/neo4j.py` providing thread-safe synchronous and asynchronous driver singletons, session generators (`get_sync_neo4j_session`, `get_async_neo4j_session`), connectivity testing (`verify_neo4j_connection`), and graceful shutdown handlers.
+- **Connectivity & Cypher Verification** (`backend/scripts/test_neo4j.py`):
+  - Created standalone validation script executing `RETURN 'Neo4j is online and ready for GraphRAG!'` and querying server version and protocol.
+
+**Validation:**
+- Neo4j container started and healthy on `localhost:7474` / `localhost:7687`.
+- `uv run python scripts/test_neo4j.py` executed with exit code 0:
+  - Agent: `Neo4j/5.26.30`
+  - Protocol: `(5, 8)`
+  - Cypher test query returned expected payload.
+
+**Next:** Phase 4 Task 2 — Write a parser that walks a generated project's files and extracts import/function-call relationships.
+

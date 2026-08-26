@@ -46,7 +46,7 @@ Reference: Replit Agent, Lovable, and v0 — left panel for chat + agent status,
 
 ## Phase 4 — GraphRAG (Week 4)
 
-- [ ] Stand up Neo4j (local or hosted free tier)
+- [x] Stand up Neo4j (local or hosted free tier)
 - [ ] Write a parser that walks a generated project's files and extracts import/function-call relationships
 - [ ] Load the extracted relationships into Neo4j as a graph
 - [ ] Write Cypher queries for common traversal needs (e.g. "what does this function call", "what imports this file")

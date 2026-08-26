@@ -19,6 +19,27 @@ services:
       timeout: 5s
       retries: 5
 
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: kint-neo4j
+    restart: always
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4jpassword}
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    volumes:
+      - kint_neo4jdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   kint_pgdata:
     driver: local
+  kint_neo4jdata:
+    driver: local
+
